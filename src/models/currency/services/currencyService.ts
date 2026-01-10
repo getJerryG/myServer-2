@@ -117,35 +117,40 @@ export default class CurrencyService {
                     name: "平台币",
                     symbol: "PC",
                     decimal: 0,
-                    description: "平台通用货币"
+                    description: "平台通用货币",
+                    status: CurrencyStatus.ENABLED
                 },
                 {
                     id: CurrencyTypeId.TEAM_COIN,
                     name: "团队币",
                     symbol: "TC",
                     decimal: 0,
-                    description: "团队活动货币"
+                    description: "团队活动货币",
+                    status: CurrencyStatus.ENABLED
                 },
                 {
                     id: CurrencyTypeId.MATCH_COIN,
                     name: "比赛币",
                     symbol: "MC",
                     decimal: 0,
-                    description: "比赛专用货币"
+                    description: "比赛专用货币",
+                    status: CurrencyStatus.ENABLED
                 },
                 {
                     id: CurrencyTypeId.BET_COIN,
                     name: "投注币",
                     symbol: "BC",
                     decimal: 0,
-                    description: "投注专用货币"
+                    description: "投注专用货币",
+                    status: CurrencyStatus.ENABLED
                 },
                 {
                     id: CurrencyTypeId.POINT,
                     name: "积分",
                     symbol: "P",
                     decimal: 0,
-                    description: "用户积分"
+                    description: "用户积分",
+                    status: CurrencyStatus.ENABLED
                 }
             ];
 
