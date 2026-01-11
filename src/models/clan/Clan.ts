@@ -22,8 +22,8 @@ export default class Clan {
     leader: string;
     _admin = new Map<string, ClanMember>();
     _members = new Map<string, ClanMember>();
-    _contests = new Map<string, any>();
-    _teams: any[] = [];
+    _contests = new Map<string, Record<string, unknown>>();
+    _teams: Record<string, unknown>[] = [];
     _honors = new Map<string, TitleBase>();
     
     constructor(clanOptions: IClanOptions) {
@@ -301,7 +301,7 @@ export default class Clan {
     /**
      * 添加比赛记录
      */
-    addContestRecord(contest: any) {
+    addContestRecord(contest: Record<string, unknown>) {
         this._contests.set(contest.id, contest);
         this.cacheContests();
     }
@@ -309,8 +309,8 @@ export default class Clan {
     /**
      * 处理比赛结果
      */
-    processContestResult(records: any) {
-        const members = this.members;
+    processContestResult(records: Record<string, unknown>) {
+        const {members} = this;
         members.forEach((member) => {
             this.getMember(member.nickName)?.addExp(10);
         });

@@ -2,16 +2,16 @@
  * 图片异步处理工具
  */
 
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 
 // MIME类型映射
 const mimeTypes: Record<string, string> = {
-    '.jpg': 'image/jpeg',
-    '.jpeg': 'image/jpeg',
-    '.png': 'image/png',
-    '.gif': 'image/gif',
-    '.webp': 'image/webp'
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
+    ".gif": "image/gif",
+    ".webp": "image/webp"
 };
 
 /**
@@ -21,7 +21,7 @@ const mimeTypes: Record<string, string> = {
  */
 function getMimeType(filename: string): string {
     const ext = path.extname(filename).toLowerCase();
-    return mimeTypes[ext] || 'application/octet-stream';
+    return mimeTypes[ext] || "application/octet-stream";
 }
 
 /**
@@ -48,7 +48,7 @@ async function traverseDirectory(directory: string): Promise<string[]> {
                 // 处理文件，不需要读取文件内容，只需要路径
                 
                 // 归一化路径
-                const normalizedPath = itemPath.replace('public/', '/');
+                const normalizedPath = itemPath.replace("public/", "/");
                 results.push(normalizedPath);
             }
         }
@@ -82,7 +82,7 @@ export async function loadImagesAsBase64(directory: string): Promise<string[]> {
 export async function imageToBase64(filePath: string): Promise<string> {
     try {
         const fileData = await fs.promises.readFile(filePath);
-        const base64Data = fileData.toString('base64');
+        const base64Data = fileData.toString("base64");
         const mimeType = getMimeType(filePath);
         
         return `data:${mimeType};base64,${base64Data}`;
@@ -99,11 +99,11 @@ export async function imageToBase64(filePath: string): Promise<string> {
  */
 export async function deleteImages(destinationFolderPath: string, imagePaths: string[]): Promise<void> {
     try {
-        console.log('deleteImages', destinationFolderPath, imagePaths);
+        console.log("deleteImages", destinationFolderPath, imagePaths);
         
         for (const imagePath of imagePaths) {
             const imageFilePath = path.join(destinationFolderPath, imagePath);
-            console.log('deleteImages', imageFilePath);
+            console.log("deleteImages", imageFilePath);
             
             try {
                 await fs.promises.unlink(imageFilePath);
@@ -114,7 +114,7 @@ export async function deleteImages(destinationFolderPath: string, imagePaths: st
             }
         }
     } catch (err) {
-        console.error('Error in deleteImages:', err);
+        console.error("Error in deleteImages:", err);
         throw err;
     }
 }

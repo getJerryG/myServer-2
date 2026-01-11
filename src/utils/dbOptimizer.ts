@@ -2,7 +2,7 @@
  * 数据库优化器工具
  */
 
-import { Model, Document, FilterQuery } from 'mongoose';
+import { Model, Document, FilterQuery } from "mongoose";
 
 /**
  * 数据库优化器类
@@ -18,7 +18,7 @@ export class DBOptimizer {
     static async getEntityId<T extends Document>(
         model: Model<T>,
         query: FilterQuery<T>,
-        idField: string = '_id'
+        idField: string = "_id"
     ): Promise<string | null> {
         try {
             const entity = await model.findOne(query).select(idField).lean() as Record<string, any>;
@@ -27,7 +27,7 @@ export class DBOptimizer {
             }
             return entity[idField]?.toString() || null;
         } catch (error) {
-            console.error('Error getting entity ID:', error);
+            console.error("Error getting entity ID:", error);
             return null;
         }
     }
@@ -42,7 +42,7 @@ export class DBOptimizer {
     static async batchGetEntityIds<T extends Document>(
         model: Model<T>,
         queries: FilterQuery<T>[],
-        idField: string = '_id'
+        idField: string = "_id"
     ): Promise<(string | null)[]> {
         try {
             const promises = queries.map(query => 
@@ -50,7 +50,7 @@ export class DBOptimizer {
             );
             return await Promise.all(promises);
         } catch (error) {
-            console.error('Error batch getting entity IDs:', error);
+            console.error("Error batch getting entity IDs:", error);
             return queries.map(() => null);
         }
     }

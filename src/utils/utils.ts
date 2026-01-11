@@ -25,8 +25,8 @@ export function obj2arr(obj: Record<string, number>): string[] {
  * @returns 随机ID
  */
 export function generateId(length: number = 8): string {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let result = '';
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "";
     
     for (let i = 0; i < length; i++) {
         result += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -41,7 +41,7 @@ export function generateId(length: number = 8): string {
  * @returns 拷贝后的对象
  */
 export function deepClone<T>(obj: T): T {
-    if (obj === null || typeof obj !== 'object') {
+    if (obj === null || typeof obj !== "object") {
         return obj;
     }
     
@@ -53,7 +53,7 @@ export function deepClone<T>(obj: T): T {
         return obj.map(item => deepClone(item)) as unknown as T;
     }
     
-    if (typeof obj === 'object') {
+    if (typeof obj === "object") {
         const clonedObj: Record<string, any> = {};
         for (const key in obj) {
             if (obj.hasOwnProperty(key)) {
@@ -72,21 +72,21 @@ export function deepClone<T>(obj: T): T {
  * @param format 格式字符串
  * @returns 格式化后的日期字符串
  */
-export function formatDate(date: Date, format: string = 'YYYY-MM-DD HH:mm:ss'): string {
+export function formatDate(date: Date, format: string = "YYYY-MM-DD HH:mm:ss"): string {
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
     
     return format
-        .replace('YYYY', year.toString())
-        .replace('MM', month)
-        .replace('DD', day)
-        .replace('HH', hours)
-        .replace('mm', minutes)
-        .replace('ss', seconds);
+        .replace("YYYY", year.toString())
+        .replace("MM", month)
+        .replace("DD", day)
+        .replace("HH", hours)
+        .replace("mm", minutes)
+        .replace("ss", seconds);
 }
 
 /**
