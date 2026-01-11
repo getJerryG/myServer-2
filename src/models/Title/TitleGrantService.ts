@@ -119,10 +119,8 @@ export class TitleGrantService {
             }
         }
 
-    // 检查积分条件 
-         
-        
-        .points && recipientData.points < condition.points) {
+    // 检查积分条件
+        if (condition.points && recipientData.points < condition.points) {
             return false;
         }
 
@@ -177,16 +175,14 @@ export class TitleGrantService {
      * 授予头衔
      * @param options 授予选项
      */
-                tleGrantOptions): Promise<ITitleGrantRecord> {
+    static async grantTitle(options: TitleGrantOptions): Promise<ITitleGrantRecord> {
         const title = await Title.findById(options.titleId);
         if (!title) {
             throw new Error("Title not found");
         }
 
         const record = new TitleGrantRecord({
-            recordId: `${options.recipientType}${options.titleId}${Date
-            now()
-        }`,
+            recordId: `${options.recipientType}${options.titleId}${Date.now()}`,
             titleId: options.titleId,
             recipientType: options.recipientType,
             recipientId: options.recipientId,
@@ -196,7 +192,6 @@ export class TitleGrantService {
             metadata: options.metadata,
             expireAt: title.expiredAt
         });
-
         await record.save();
 
         // 根据接收者类型授予头衔
