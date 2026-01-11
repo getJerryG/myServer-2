@@ -52,7 +52,7 @@ export default class TitleService {
      * @returns 是否存在
      */
     static async checkTitleExists(title: string, excludeId?: string): Promise<boolean> {
-        const query: any = { title };
+        const query: Record<string, unknown> = { title };
         
         if (excludeId) {
             query.id = { $ne: excludeId };
@@ -221,7 +221,7 @@ export default class TitleService {
     static async queryTitles(
         options: TitleQueryOptions = {}
     ): Promise<{ titles: ITitle[]; total: number; page: number; limit: number; totalPages: number }> {
-        const query: any = {};
+        const query: Record<string, unknown> = {};
         
         // 添加状态筛选
         if (options.status && options.status.length > 0) {
@@ -260,7 +260,7 @@ export default class TitleService {
         const skip = (page - 1) * limit;
 
         // 排序参数
-        const sort: any = {};
+        const sort: Record<string, 1 | -1> = {};
         if (options.sortBy) {
             sort[options.sortBy] = options.sortOrder || "asc";
         } else {
