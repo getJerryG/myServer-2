@@ -13,15 +13,15 @@ async function testPlayerStatusBinary(): Promise<void> {
         
         // 选手已进群、已签到、已进房、已完成游戏
         const fullStatus = ContestDay.generatePlayerStatus(true, true, true, true);
-        console.log(`   已进群 + 已签到 + 已进房 + 已完成游戏: ${fullStatus} (二进制: ${fullStatus.toString(2).padStart(4, '0')})`);
+        console.log(`   已进群 + 已签到 + 已进房 + 已完成游戏: ${fullStatus} (二进制: ${fullStatus.toString(2).padStart(4, "0")})`);
         
         // 选手已进群、已签到、已进房、未完成游戏
         const preparationStatus = ContestDay.generatePlayerStatus(true, true, true, false);
-        console.log(`   已进群 + 已签到 + 已进房 + 未完成游戏: ${preparationStatus} (二进制: ${preparationStatus.toString(2).padStart(4, '0')})`);
+        console.log(`   已进群 + 已签到 + 已进房 + 未完成游戏: ${preparationStatus} (二进制: ${preparationStatus.toString(2).padStart(4, "0")})`);
         
         // 选手未进群、未签到、未进房、未完成游戏
         const noneStatus = ContestDay.generatePlayerStatus(false, false, false, false);
-        console.log(`   未进群 + 未签到 + 未进房 + 未完成游戏: ${noneStatus} (二进制: ${noneStatus.toString(2).padStart(4, '0')})`);
+        console.log(`   未进群 + 未签到 + 未进房 + 未完成游戏: ${noneStatus} (二进制: ${noneStatus.toString(2).padStart(4, "0")})`);
         
         // 2. 解析选手状态
         console.log("\n2. 解析选手状态:");
@@ -54,22 +54,22 @@ async function testPlayerStatusBinary(): Promise<void> {
         
         // 选手初始状态：已进群
         let currentStatus = PlayerDayStatus.JOINED_GROUP;
-        console.log(`   初始状态: ${currentStatus} (二进制: ${currentStatus.toString(2).padStart(4, '0')})`);
+        console.log(`   初始状态: ${currentStatus} (二进制: ${currentStatus.toString(2).padStart(4, "0")})`);
         
         // 更新状态：添加已签到
         currentStatus = ContestDay.updatePlayerStatus(currentStatus, PlayerDayStatus.SIGNED_IN);
-        console.log(`   添加已签到后: ${currentStatus} (二进制: ${currentStatus.toString(2).padStart(4, '0')})`);
+        console.log(`   添加已签到后: ${currentStatus} (二进制: ${currentStatus.toString(2).padStart(4, "0")})`);
         
         // 更新状态：添加已进房
         currentStatus = ContestDay.updatePlayerStatus(currentStatus, PlayerDayStatus.ENTERED_ROOM);
-        console.log(`   添加已进房后: ${currentStatus} (二进制: ${currentStatus.toString(2).padStart(4, '0')})`);
+        console.log(`   添加已进房后: ${currentStatus} (二进制: ${currentStatus.toString(2).padStart(4, "0")})`);
         
         // 5. 移除选手状态
         console.log("\n5. 移除选手状态:");
         
         // 移除已签到状态
         currentStatus = ContestDay.removePlayerStatus(currentStatus, PlayerDayStatus.SIGNED_IN);
-        console.log(`   移除已签到后: ${currentStatus} (二进制: ${currentStatus.toString(2).padStart(4, '0')})`);
+        console.log(`   移除已签到后: ${currentStatus} (二进制: ${currentStatus.toString(2).padStart(4, "0")})`);
         
         // 6. 演示不同选手状态的二进制表示
         console.log("\n6. 不同选手状态的二进制表示:");

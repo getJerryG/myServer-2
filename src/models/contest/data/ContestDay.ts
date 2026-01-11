@@ -299,7 +299,7 @@ export default class ContestDay {
             isEnteredRoom,
             isGameCompleted,
             statusValue: status,
-            statusBinary: status.toString(2).padStart(4, '0')
+            statusBinary: status.toString(2).padStart(4, "0")
         };
     }
 
