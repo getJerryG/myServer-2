@@ -288,7 +288,7 @@ export class TitleGrantService {
             query.status = { $in: options.status };
         }
         if (options.grantedAtFrom) {
-            query.grantedAt = { $gte: options.grant e dAtFrom };        
+            query.grantedAt = { $gte: options.grantedAtFrom };
         }
         if (options.grantedAtTo) {
             query.grantedAt = { ...query.grantedAt, $lte: options.grantedAtTo };
@@ -314,31 +314,26 @@ export class TitleGrantService {
                 .sort(sort)
                 .skip(skip)
                 .limit(limit),
-           
-    T
-itleGrantRecord.countDocuments(query)
+            TitleGrantRecord.countDocuments(query)
         ]);
 
         const totalPages = Math.ceil(total / limit);
-
         return {
             records,
             total,
-page,
-        limit,
-                        totalPa
-    e
-s
+            page,
+            limit,
+            totalPages
         };
     }
   
-    *    
-     * 获取单个授予记录    
-     * @param recordId 记录ID      
-    
-        static async getGrantRecord(rec Id: string): Promise <ITileGrantRecord | null> {
-            return TitleGrantRecord.findOne({ recordId }).populate("titleId");
-        }
+    /**
+     * 获取单个授予记录
+     * @param recordId 记录ID
+     */
+    static async getGrantRecord(recordId: string): Promise<ITitleGrantRecord | null> {
+        return TitleGrantRecord.findOne({ recordId }).populate("titleId");
+    }
 
     /**
      * 根据接收者获取授予记录  
@@ -347,8 +342,8 @@ s
 * @param opt ns 查询选项
      */ 
     static async getGrantRecordsByRecipient(
-   recipi tType: "user" | "clan",
-        recipientId: mongoose.Types.ObjectId  
+        recipientType: "user" | "clan",
+        recipientId: mongoose.Types.ObjectId,
         options: Omit<GrantRecordQueryOptions, "recipientType" | "recipientId"> = {}
     ): Promise<{
         records: ITitleGrantRecord[];
