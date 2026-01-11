@@ -1,6 +1,5 @@
-/**
- * WebSocket消息类型枚举
- */
+import type { Metadata } from "~/base-types";
+
 export enum MessageType {
     CHAT = "chat",
     GAME_ACTION = "gameAction",
@@ -9,11 +8,8 @@ export enum MessageType {
     GAME_STATUS = "gameStatus"
 }
 
-/**
- * WebSocket消息接口
- */
-export interface Message {
-    type: MessageType;
+export interface MessageBase<T extends MessageType = MessageType> {
+    type: T;
     content: Record<string, unknown>;
     senderId?: string;
     receiverId?: string;
@@ -22,61 +18,61 @@ export interface Message {
     messageId?: string;
 }
 
-/**
- * 聊天消息接口
- */
-export interface ChatMessage extends Message {
-    type: MessageType.CHAT;
-    content: {
-        text: string;
-        images?: string[];
-        emojis?: string[];
-    };
-}
+export type Message<T extends MessageType = MessageType> = MessageBase<T>;
 
-/**
- * 游戏动作消息接口
- */
-export interface GameActionMessage extends Message {
-    type: MessageType.GAME_ACTION;
-    content: {
-        action: string;
-        data: Record<string, unknown>;
-    };
-}
+export type ChatContent = {
+    text: string;
+    images?: string[];
+    emojis?: string[];
+};
 
-/**
- * 系统通知消息接口
- */
-export interface SystemNotificationMessage extends Message {
-    type: MessageType.SYSTEM_NOTIFICATION;
-    content: {
-        title: string;
-        message: string;
-        data?: Record<string, unknown>;
-    };
-}
+export type GameActionContent = {
+    action: string;
+    data: Record<string, unknown>;
+};
 
-/**
- * 用户状态消息接口
- */
-export interface UserStatusMessage extends Message {
-    type: MessageType.USER_STATUS;
-    content: {
-        userId: string;
-        status: string;
-        data?: Record<string, unknown>;
-    };
-}
+export type SystemNotificationContent = {
+    title: string;
+    message: string;
+    data?: Record<string, unknown>;
+};
 
-/**
- * 游戏状态消息接口
- */
-export interface GameStatusMessage extends Message {
-    type: MessageType.GAME_STATUS;
-    content: {
-        gameId: string;
-        status: string;
-        data?: Record<string, unknown>;
-    };
-}
+export type UserStatusContent = {
+    userId: string;
+    status: string;
+    data?: Record<string, unknown>;
+};
+
+export type GameStatusContent = {
+    gameId: string;
+    status: string;
+    data?: Record<string, unknown>;
+};
+
+export type ChatMessage = Message<MessageType.CHAT> & { content: ChatContent };
+export type GameActionMessage = Message<MessageType.GAME_ACTION> & { content: GameActionContent };
+export type SystemNotificationMessage = Message<MessageType.SYSTEM_NOTIFICATION> & { content: SystemNotificationContent };
+export type UserStatusMessage = Message<MessageType.USER_STATUS> & { content: UserStatusContent };
+export type GameStatusMessage = Message<MessageType.GAME_STATUS> & { content: GameStatusContent };
+
+export type AnyMessage = 
+    | ChatMessage 
+    | GameActionMessage 
+    | SystemNotificationMessage 
+    | UserStatusMessage 
+    | GameStatusMessage;
+
+export type MessageContentByType<T extends MessageType> = 
+    T extends MessageType.CHAT 
+        ? ChatContent 
+        : T extends MessageType.GAME_ACTION 
+            ? GameActionContent 
+            : T extends MessageType.SYSTEM_NOTIFICATION 
+                ? SystemNotificationContent 
+                : T extends MessageType.USER_STATUS 
+                    ? UserStatusContent 
+                    : T extends MessageType.GAME_STATUS 
+                        ? GameStatusContent 
+                        : Record<string, unknown>;
+
+export type TypedMessage<T extends MessageType> = Message<T> & { content: MessageContentByType<T> };

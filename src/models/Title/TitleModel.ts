@@ -1,9 +1,7 @@
 import mongoose, { Schema, Model, Document } from "mongoose";
 import option from "../../db/model/option";
+import type { Timestamps, Metadata, WithMetadata, WithDocument } from "~/base-types";
 
-/**
- * 头衔状态枚举
- */
 export enum TitleStatus {
     ACTIVE = "active",
     INACTIVE = "inactive",
@@ -11,14 +9,8 @@ export enum TitleStatus {
     PENDING = "pending"
 }
 
-/**
- * 头衔类型
- */
 export type TitleType = "achievement" | "honor" | "activity" | "season" | "clan" | "special" | "custom" | "system";
 
-/**
- * 头衔获取条件
- */
 export interface TitleCondition {
     requiredLevel?: number;
     requiredExp?: number;
@@ -28,70 +20,67 @@ export interface TitleCondition {
     timeLimit?: boolean;
 }
 
-/**
- * 头衔接口
- */
-export interface ITitle extends Document {
+export interface TitleBase extends Timestamps {
     id: string;
     title: string;
     description: string;
     type: TitleType;
     image?: string;
     status: TitleStatus;
-    createdAt: Date;
-    updatedAt: Date;
     expiredAt?: Date;
     conditions: TitleCondition;
     category: string;
-    rarity: "common" | "rare" | "epic" | "legendary";
+    rarity: TitleRarity;
     isTimeLimited: boolean;
 }
 
-/**
- * 用户头衔接口
- */
-export interface IUserTitle extends Document {
+export type TitleRarity = "common" | "rare" | "epic" | "legendary";
+
+export type UserTitleStatus = "active" | "equipped" | "expired" | "revoked";
+
+export type ClanTitleStatus = "active" | "expired" | "revoked";
+
+export type GrantType = "auto" | "manual";
+
+export type RecipientType = "user" | "clan";
+
+export type GrantStatus = "granted" | "revoked" | "expired";
+
+export interface UserTitleBase extends Timestamps, WithMetadata {
     userId: mongoose.Types.ObjectId;
     titleId: mongoose.Types.ObjectId;
     obtainedAt: Date;
-    status: "active" | "equipped" | "expired" | "revoked";
+    status: UserTitleStatus;
     equipped: boolean;
     revokedAt?: Date;
-    metadata?: Record<string, any>;
 }
 
-/**
- * 战队头衔接口
- */
-export interface IClanTitle extends Document {
+export interface ClanTitleBase extends Timestamps, WithMetadata {
     clanId: mongoose.Types.ObjectId;
     titleId: mongoose.Types.ObjectId;
     obtainedAt: Date;
-    status: "active" | "expired" | "revoked";
+    status: ClanTitleStatus;
     revokedAt?: Date;
-    metadata?: Record<string, any>;
 }
 
-/**
- * 头衔授予记录接口
- */
-export interface ITitleGrantRecord extends Document {
+export interface TitleGrantRecordBase extends Timestamps, WithMetadata {
     recordId: string;
     titleId: mongoose.Types.ObjectId;
-    recipientType: "user" | "clan";
+    recipientType: RecipientType;
     recipientId: mongoose.Types.ObjectId;
-    grantType: "auto" | "manual";
+    grantType: GrantType;
     grantedBy: mongoose.Types.ObjectId;
     grantedAt: Date;
     expireAt?: Date;
-    status: "granted" | "revoked" | "expired";
+    status: GrantStatus;
     reason?: string;
-    metadata?: Record<string, any>;
 }
 
-/**
- * 头衔Schema
- */
+export type ITitle = WithDocument<TitleBase>;
+export type IUserTitle = WithDocument<UserTitleBase>;
+export type IClanTitle = WithDocument<ClanTitleBase>;
+export type ITitleGrantRecord = WithDocument<TitleGrantRecordBase>;
+
 const titleSchema = new Schema<ITitle>(
     {
         id: {
@@ -159,9 +148,6 @@ const titleSchema = new Schema<ITitle>(
     option
 );
 
-/**
- * 用户头衔Schema
- */
 const userTitleSchema = new Schema<IUserTitle>(
     {
         userId: {
@@ -207,12 +193,8 @@ const userTitleSchema = new Schema<IUserTitle>(
     option
 );
 
-// 创建唯一索引
 userTitleSchema.index({ userId: 1, titleId: 1 }, { unique: true });
 
-/**
- * 战队头衔Schema
- */
 const clanTitleSchema = new Schema<IClanTitle>(
     {
         clanId: {
@@ -252,12 +234,8 @@ const clanTitleSchema = new Schema<IClanTitle>(
     option
 );
 
-// 创建唯一索引
 clanTitleSchema.index({ clanId: 1, titleId: 1 }, { unique: true });
 
-/**
- * 头衔授予记录Schema
- */
 const titleGrantRecordSchema = new Schema<ITitleGrantRecord>(
     {
         recordId: {
@@ -325,9 +303,6 @@ const titleGrantRecordSchema = new Schema<ITitleGrantRecord>(
     option
 );
 
-/**
- * 模型导出
- */
 export const Title: Model<ITitle> = mongoose.model<ITitle>("Titles", titleSchema, "titles");
 export const UserTitle: Model<IUserTitle> = mongoose.model<IUserTitle>("UserTitles", userTitleSchema, "user_titles");
 export const ClanTitle: Model<IClanTitle> = mongoose.model<IClanTitle>("ClanTitles", clanTitleSchema, "clan_titles");
