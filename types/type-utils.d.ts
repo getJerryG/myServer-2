@@ -71,7 +71,7 @@ export type UnionToIntersection<U> = (U extends any
         ? I 
         : never;
 
-export type LastOf<T> = UnionToIntersection<T & {}> extends infer U 
+export type LastOf<T> = UnionToIntersection<T> extends infer U 
     ? U extends { [infer L, ...infer R] } 
         ? LastOf<R> 
         : U 
