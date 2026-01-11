@@ -336,10 +336,10 @@ export class TitleGrantService {
     }
 
     /**
-     * 根据接收者获取授予记录  
-     * @param recipientType 接收者类  
+     * 根据接收者获取授予记录
+     * @param recipientType 接收者类型
      * @param recipientId 接收者ID
-* @param opt ns 查询选项
+     * @param options 查询选项
      */ 
     static async getGrantRecordsByRecipient(
         recipientType: "user" | "clan",
