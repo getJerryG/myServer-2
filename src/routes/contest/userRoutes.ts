@@ -768,7 +768,7 @@ router.get("/today-matches", authMiddleware, async (req: Request, res: Response)
         
         const todayMatches = [];
         schedules.forEach(schedule => {
-            const todaySchedule = schedule.schedule.find((daily: any) => daily.date === todayDate);
+            const todaySchedule = schedule.schedule.find((daily: Record<string, unknown>) => daily.date === todayDate);
             if (todaySchedule && todaySchedule.matches.length > 0) {
                 todayMatches.push({
                     roundName: schedule.roundName,

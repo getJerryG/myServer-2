@@ -14,7 +14,7 @@ export enum MessageType {
  */
 export interface Message {
     type: MessageType;
-    content: any;
+    content: Record<string, unknown>;
     senderId?: string;
     receiverId?: string;
     timestamp?: number;
@@ -41,7 +41,7 @@ export interface GameActionMessage extends Message {
     type: MessageType.GAME_ACTION;
     content: {
         action: string;
-        data: any;
+        data: Record<string, unknown>;
     };
 }
 
@@ -53,7 +53,7 @@ export interface SystemNotificationMessage extends Message {
     content: {
         title: string;
         message: string;
-        data?: any;
+        data?: Record<string, unknown>;
     };
 }
 
@@ -65,7 +65,7 @@ export interface UserStatusMessage extends Message {
     content: {
         userId: string;
         status: string;
-        data?: any;
+        data?: Record<string, unknown>;
     };
 }
 
@@ -77,6 +77,6 @@ export interface GameStatusMessage extends Message {
     content: {
         gameId: string;
         status: string;
-        data?: any;
+        data?: Record<string, unknown>;
     };
 }
