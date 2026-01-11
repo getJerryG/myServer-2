@@ -7,7 +7,7 @@ export interface ClanTitleOptions {
     titleId: mongoose.Types.ObjectId;
     status?: "active" | "expired" | "revoked";
     equipped?: boolean;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
 }
 
 export interface ClanTitleQueryOptions {
@@ -124,7 +124,7 @@ export default class ClanTitleService {
         totalPages: number;
     }> {
         // 构建查询条件
-        const query: any = { clanId };
+        const query: Record<string, unknown> = { clanId };
         
         if (options.status && options.status.length > 0) {
             query.status = { $in: options.status };
@@ -136,7 +136,7 @@ export default class ClanTitleService {
         const skip = (page - 1) * limit;
         
         // 排序配置
-        const sort: any = {};
+        const sort: Record<string, 1 | -1> = {};
         if (options.sortBy) {
             sort[options.sortBy] = options.sortOrder || "asc";
         } else {

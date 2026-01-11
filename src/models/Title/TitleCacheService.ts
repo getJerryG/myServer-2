@@ -170,7 +170,7 @@ export default class TitleCacheService {
      * 缓存头衔统计
      * @param stats 统计信息
      */
-    static async cacheTitleStats(stats: any): Promise<void> {
+    static async cacheTitleStats(stats: Record<string, unknown>): Promise<void> {
         await RedisCacheManager.set(TitleCacheKeys.TITLE_STATS, stats, TitleCacheExpiration.TITLE_STATS);
     }
 
@@ -178,7 +178,7 @@ export default class TitleCacheService {
      * 从缓存获取头衔统计
      * @returns 统计信息
      */
-    static async getTitleStatsFromCache(): Promise<any | undefined> {
+    static async getTitleStatsFromCache(): Promise<Record<string, unknown> | undefined> {
         return RedisCacheManager.get<any>(TitleCacheKeys.TITLE_STATS);
     }
 
