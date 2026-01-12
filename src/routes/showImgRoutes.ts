@@ -36,7 +36,7 @@ router.get("/", async (req: Request, res: Response) => {
 });
 
 // 辅助函数：成功响应
-function resSuccess(res: Response, data: any, message: string) {
+function resSuccess(res: Response, data: Record<string, unknown>, message: string) {
     res.json({ success: true, data, message });
 }
 

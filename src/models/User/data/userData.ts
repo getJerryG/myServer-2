@@ -91,7 +91,7 @@ export default class User {
      * @param level 等级
      * @param reward 奖励内容
      */
-    static async rewardLvAll(level: number, reward: any): Promise<void> {
+    static async rewardLvAll(level: number, reward: Record<string, unknown>): Promise<void> {
         try {
             await UserModel.updateMany(
                 { level: { $lt: level } },
@@ -276,7 +276,7 @@ export default class User {
      * @param query 查询条件
      * @returns 用户列表
      */
-    static async find(query: any = {}, projection: any = {}): Promise<IUser[]> {
+    static async find(query: Record<string, unknown> = {}, projection: Record<string, unknown> = {}): Promise<IUser[]> {
         try {
             return await UserModel.find(query, projection).exec();
         } catch (_error) {
@@ -289,7 +289,7 @@ export default class User {
      * @param query 查询条件
      * @returns 用户信息
      */
-    static async findOne(query: any = {}, projection: any = {}): Promise<IUser | null> {
+    static async findOne(query: Record<string, unknown> = {}, projection: Record<string, unknown> = {}): Promise<IUser | null> {
         try {
             return await UserModel.findOne(query, projection).exec();
         } catch (_error) {
@@ -304,7 +304,7 @@ export default class User {
      * @param options 更新选项
      * @returns 更新后的用户信息
      */
-    static async findOneAndUpdate(query: any, update: any, options: any = {}): Promise<IUser | null> {
+    static async findOneAndUpdate(query: Record<string, unknown>, update: Record<string, unknown>, options: Record<string, unknown> = {}): Promise<IUser | null> {
         try {
             return await UserModel.findOneAndUpdate(query, update, options).exec();
         } catch (error) {

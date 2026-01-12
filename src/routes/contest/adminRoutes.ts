@@ -8,7 +8,7 @@ import { Admin } from "@/middlewares/role";
 declare global {
     namespace Express {
         interface Request {
-            user?: any;
+            user?: Record<string, unknown>;
         }
     }
 }

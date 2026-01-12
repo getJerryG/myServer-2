@@ -119,10 +119,8 @@ export class TitleGrantService {
             }
         }
 
-    // 检查积分条件 
-         
-        
-        .points && recipientData.points < condition.points) {
+    // 检查积分条件
+        if (condition.points && recipientData.points < condition.points) {
             return false;
         }
 
@@ -177,16 +175,14 @@ export class TitleGrantService {
      * 授予头衔
      * @param options 授予选项
      */
-                tleGrantOptions): Promise<ITitleGrantRecord> {
+    static async grantTitle(options: TitleGrantOptions): Promise<ITitleGrantRecord> {
         const title = await Title.findById(options.titleId);
         if (!title) {
             throw new Error("Title not found");
         }
 
         const record = new TitleGrantRecord({
-            recordId: `${options.recipientType}${options.titleId}${Date
-            now()
-        }`,
+            recordId: `${options.recipientType}${options.titleId}${Date.now()}`,
             titleId: options.titleId,
             recipientType: options.recipientType,
             recipientId: options.recipientId,
@@ -196,7 +192,6 @@ export class TitleGrantService {
             metadata: options.metadata,
             expireAt: title.expiredAt
         });
-
         await record.save();
 
         // 根据接收者类型授予头衔
@@ -293,7 +288,7 @@ export class TitleGrantService {
             query.status = { $in: options.status };
         }
         if (options.grantedAtFrom) {
-            query.grantedAt = { $gte: options.grant e dAtFrom };        
+            query.grantedAt = { $gte: options.grantedAtFrom };
         }
         if (options.grantedAtTo) {
             query.grantedAt = { ...query.grantedAt, $lte: options.grantedAtTo };
@@ -319,41 +314,36 @@ export class TitleGrantService {
                 .sort(sort)
                 .skip(skip)
                 .limit(limit),
-           
-    T
-itleGrantRecord.countDocuments(query)
+            TitleGrantRecord.countDocuments(query)
         ]);
 
         const totalPages = Math.ceil(total / limit);
-
         return {
             records,
             total,
-page,
-        limit,
-                        totalPa
-    e
-s
+            page,
+            limit,
+            totalPages
         };
     }
   
-    *    
-     * 获取单个授予记录    
-     * @param recordId 记录ID      
-    
-        static async getGrantRecord(rec Id: string): Promise <ITileGrantRecord | null> {
-            return TitleGrantRecord.findOne({ recordId }).populate("titleId");
-        }
+    /**
+     * 获取单个授予记录
+     * @param recordId 记录ID
+     */
+    static async getGrantRecord(recordId: string): Promise<ITitleGrantRecord | null> {
+        return TitleGrantRecord.findOne({ recordId }).populate("titleId");
+    }
 
     /**
-     * 根据接收者获取授予记录  
-     * @param recipientType 接收者类  
+     * 根据接收者获取授予记录
+     * @param recipientType 接收者类型
      * @param recipientId 接收者ID
-* @param opt ns 查询选项
+     * @param options 查询选项
      */ 
     static async getGrantRecordsByRecipient(
-   recipi tType: "user" | "clan",
-        recipientId: mongoose.Types.ObjectId  
+        recipientType: "user" | "clan",
+        recipientId: mongoose.Types.ObjectId,
         options: Omit<GrantRecordQueryOptions, "recipientType" | "recipientId"> = {}
     ): Promise<{
         records: ITitleGrantRecord[];
