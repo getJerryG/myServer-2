@@ -14,7 +14,7 @@ export default class ContestScheduleService {
      */
     private static validateScheduleMatches(schedule: DailySchedule[]): void {
         for (const dailySchedule of schedule) {
-            const date = dailySchedule.date;
+            const {date} = dailySchedule;
             // 计算日期对应的星期几（1-7，1代表周一，7代表周日）
             const dateObj = new Date(date);
             let weekDay = dateObj.getDay();

@@ -121,14 +121,14 @@ function createWekfare(type: string, code: string, rewardFunction: () => any = d
     }
     
     switch (type) {
-        case "user":
-            return createUserWekfare(code, rewardFunction);
-        case "once":
-            return createOnceWekfare(code, rewardFunction);
-        case "public":
-            return createPublicWekfare(code, rewardFunction);
-        default:
-            throw new Error("未知的福利类型");
+    case "user":
+        return createUserWekfare(code, rewardFunction);
+    case "once":
+        return createOnceWekfare(code, rewardFunction);
+    case "public":
+        return createPublicWekfare(code, rewardFunction);
+    default:
+        throw new Error("未知的福利类型");
     }
 }
 

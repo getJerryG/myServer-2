@@ -33,7 +33,7 @@ export default class LuckyColorGame {
      * 初始化颜色概率映射
      */
     private initColorMap(): void {
-        let total = 100;
+        const total = 100;
         const colorLen = LuckyColorGame.colorMap.size;
         const eachValue = Number((total / colorLen).toFixed(2));
         
@@ -46,7 +46,7 @@ export default class LuckyColorGame {
      * 获取一个颜色对应的数值
      */
     getOneColorOfNumber(): number {
-        let random = Math.random() * 100;
+        const random = Math.random() * 100;
         let accumulated = 0;
         
         for (const [color, value] of LuckyColorGame.colorMap.entries()) {

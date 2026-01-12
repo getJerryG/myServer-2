@@ -62,14 +62,14 @@ function getMimeType(fileName: string): string {
     const extension = path.extname(fileName).toLowerCase();
     
     switch (extension) {
-        case ".jpg":
-        case ".jpeg":
-            return "image/jpeg";
-        case ".png":
-            return "image/png";
-        case ".gif":
-            return "image/gif";
-        default:
-            return "application/octet-stream";
+    case ".jpg":
+    case ".jpeg":
+        return "image/jpeg";
+    case ".png":
+        return "image/png";
+    case ".gif":
+        return "image/gif";
+    default:
+        return "application/octet-stream";
     }
 }

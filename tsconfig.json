@@ -35,10 +35,22 @@
     "incremental": true,// 增量编译
     "tsBuildInfoFile": "./node_modules/.cache/tsbuildinfo",// 增量编译缓存文件
     "allowJs": true, // 禁用JS文件编译
-    "strict": false, // 启用严格模式
-    "skipLibCheck": true, // 跳过库类型检查
+    "strict": true, // 启用严格模式
+    "strictNullChecks": true, // 启用严格空值检查
+    "noImplicitAny": true, // 禁止隐式 any 类型
+    "strictFunctionTypes": true, // 严格函数类型检查
+    "strictBindCallApply": true, // 严格 bind/call/apply 检查
+    "strictPropertyInitialization": true, // 严格属性初始化检查
+    "noImplicitThis": true, // 禁止隐式 this 类型
+    "alwaysStrict": true, // 始终使用严格模式
     "noUnusedLocals": true, // 检测未使用的局部变量
     "noUnusedParameters": true, // 检测未使用的参数
+    "noImplicitReturns": true, // 检测隐式返回
+    "noFallthroughCasesInSwitch": true, // 检测 switch 穿透
+    "noUncheckedIndexedAccess": true, // 检测未检查的索引访问
+    "noImplicitOverride": true, // 检测隐式覆盖
+    "noPropertyAccessFromIndexSignature": true, // 禁止从索引签名访问属性
+    "skipLibCheck": true, // 跳过库类型检查
     "moduleDetection": "force" // 强制模块检测
   },
   "include": [// 指定要编译的文件

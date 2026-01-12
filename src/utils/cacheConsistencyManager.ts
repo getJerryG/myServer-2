@@ -2,22 +2,22 @@
  * 缓存一致性管理器
  */
 
-import redisCache from './redisCache';
-import redis from '../config/redis';
+import redisCache from "./redisCache";
+import redis from "../config/redis";
 
 // 缓存键常量
 export const CACHE_KEYS = {
-    USER_INFO: 'user:info',
-    USER_STATS: 'user:stats',
-    TITLE_INFO: 'title:info',
-    TITLE_LIST: 'title:list',
-    TITLE_STATS: 'title:stats'
+    USER_INFO: "user:info",
+    USER_STATS: "user:stats",
+    TITLE_INFO: "title:info",
+    TITLE_LIST: "title:list",
+    TITLE_STATS: "title:stats"
 };
 
 // 缓存版本常量
 export const CACHE_VERSION = {
-    USER: 'v1',
-    TITLE: 'v1'
+    USER: "v1",
+    TITLE: "v1"
 };
 
 /**
@@ -31,9 +31,9 @@ export function generateCacheKey(cacheKey: string, params: Record<string, string
     const paramStr = Object.entries(params)
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([key, value]) => `${key}:${value}`)
-        .join(':');
+        .join(":");
     
-    const versionStr = version ? `:${version}` : '';
+    const versionStr = version ? `:${version}` : "";
     
     return paramStr ? `${cacheKey}:${paramStr}${versionStr}` : `${cacheKey}${versionStr}`;
 }
@@ -60,7 +60,7 @@ export class CacheConsistencyManager {
             const key = generateCacheKey(cacheKey, params, version);
             return await redisCache.set(key, data);
         } catch (error) {
-            console.error('Error updating cache:', error);
+            console.error("Error updating cache:", error);
             return false;
         }
     }
@@ -82,7 +82,7 @@ export class CacheConsistencyManager {
             const result = await redisCache.del(key);
             return result > 0;
         } catch (error) {
-            console.error('Error invalidating cache:', error);
+            console.error("Error invalidating cache:", error);
             return false;
         }
     }
@@ -112,7 +112,7 @@ export class CacheConsistencyManager {
             
             return invalidatedCount;
         } catch (error) {
-            console.error('Error batch invalidating cache:', error);
+            console.error("Error batch invalidating cache:", error);
             return 0;
         }
     }
@@ -147,7 +147,7 @@ export class CacheConsistencyManager {
             
             return invalidatedCount;
         } catch (error) {
-            console.error('Error invalidating all related cache:', error);
+            console.error("Error invalidating all related cache:", error);
             return 0;
         }
     }
@@ -185,7 +185,7 @@ export class CacheConsistencyManager {
             await redisCache.set(key, data);
             return data;
         } catch (error) {
-            console.error('Error syncing cache:', error);
+            console.error("Error syncing cache:", error);
             return undefined;
         }
     }
@@ -219,7 +219,7 @@ export class CacheConsistencyManager {
             
             return preloadedCount;
         } catch (error) {
-            console.error('Error preloading cache:', error);
+            console.error("Error preloading cache:", error);
             return 0;
         }
     }

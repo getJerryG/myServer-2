@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
-import { IJwtPayload, IAdminJwtPayload } from "~/User";
+import { IJwtPayload } from "~/User";
+import { IAdminJwtPayload } from "~/types/room";
 
 type ExpiresIn = jwt.SignOptions["expiresIn"];
 

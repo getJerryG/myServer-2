@@ -23,7 +23,7 @@ const defaultRetryConfig: RetryConfig = {
  * @param config 重试配置
  * @returns 包装后的函数
  */
-export function withRetry<T extends (...args: any[]) => Promise<unknown>>(fn: T, config?: Partial<RetryConfig>): T {
+export function withRetry<T extends (...args: unknown[]) => Promise<unknown>>(fn: T, config?: Partial<RetryConfig>): T {
     // 合并配置
     const retryConfig: RetryConfig = {
         ...defaultRetryConfig,
@@ -72,9 +72,9 @@ export function withRetry<T extends (...args: any[]) => Promise<unknown>>(fn: T,
  * @param config 重试配置
  * @returns 定时任务实例
  */
-export function withRetrySchedule(rule: any, fn: () => Promise<void>, config?: Partial<RetryConfig>) {
+export function withRetrySchedule(rule: Record<string, unknown>, fn: () => Promise<void>, config?: Partial<RetryConfig>) {
     // 导入node-schedule模块
-    const schedule = require('node-schedule');
+    const schedule = require("node-schedule");
     
     // 包装函数
     const wrappedFn = withRetry(fn, config);

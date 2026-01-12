@@ -140,7 +140,7 @@ router.post("/wallet/user", Admin, async (req: Request, res: Response) => {
 router.post("/wallet/user/batch", Admin, async (req: Request, res: Response) => {
     try {
         const { userIds } = req.body;
-        const numericUserIds = userIds.map((id: any) => Number(id));
+        const numericUserIds = userIds.map((id: string | number) => Number(id));
         const wallets = await WalletService.batchCreateUserWallets(numericUserIds);
         resSuccess(res, wallets, "批量创建用户钱包成功");
     } catch (error) {

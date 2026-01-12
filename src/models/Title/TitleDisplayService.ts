@@ -46,8 +46,8 @@ export interface TitleDisplayItem {
     expiredAt?: string;
     remainingTime?: number;
     isExpired: boolean;
-    conditions: any;
-    displayInfo?: Record<string, any>;
+    conditions: Record<string, unknown>;
+    displayInfo?: Record<string, unknown>;
 }
 
 export default class TitleDisplayService {
@@ -127,32 +127,32 @@ export default class TitleDisplayService {
     private sortTitles(titles: TitleBase[], sortBy: TitleSortOption): TitleBase[] {
         return [...titles].sort((a, b) => {
             switch (sortBy) {
-                case "createdAt_asc":
-                    return a.createdAt.getTime() - b.createdAt.getTime();
-                case "createdAt_desc":
-                    return b.createdAt.getTime() - a.createdAt.getTime();
-                case "expiredAt_asc":
-                    if (!a.expiredAt) return -1;
-                    if (!b.expiredAt) return 1;
-                    return a.expiredAt.getTime() - b.expiredAt.getTime();
-                case "expiredAt_desc":
-                    if (!a.expiredAt) return 1;
-                    if (!b.expiredAt) return -1;
-                    return b.expiredAt.getTime() - a.expiredAt.getTime();
-                case "rarity_asc":
-                    return this.rarityOrder[a.rarity] - this.rarityOrder[b.rarity];
-                case "rarity_desc":
-                    return this.rarityOrder[b.rarity] - this.rarityOrder[a.rarity];
-                case "title_asc":
-                    return a.title.localeCompare(b.title, "zh-CN");
-                case "title_desc":
-                    return b.title.localeCompare(a.title, "zh-CN");
-                case "type_asc":
-                    return a.type.localeCompare(b.type, "zh-CN");
-                case "type_desc":
-                    return b.type.localeCompare(a.type, "zh-CN");
-                default:
-                    return 0;
+            case "createdAt_asc":
+                return a.createdAt.getTime() - b.createdAt.getTime();
+            case "createdAt_desc":
+                return b.createdAt.getTime() - a.createdAt.getTime();
+            case "expiredAt_asc":
+                if (!a.expiredAt) return -1;
+                if (!b.expiredAt) return 1;
+                return a.expiredAt.getTime() - b.expiredAt.getTime();
+            case "expiredAt_desc":
+                if (!a.expiredAt) return 1;
+                if (!b.expiredAt) return -1;
+                return b.expiredAt.getTime() - a.expiredAt.getTime();
+            case "rarity_asc":
+                return this.rarityOrder[a.rarity] - this.rarityOrder[b.rarity];
+            case "rarity_desc":
+                return this.rarityOrder[b.rarity] - this.rarityOrder[a.rarity];
+            case "title_asc":
+                return a.title.localeCompare(b.title, "zh-CN");
+            case "title_desc":
+                return b.title.localeCompare(a.title, "zh-CN");
+            case "type_asc":
+                return a.type.localeCompare(b.type, "zh-CN");
+            case "type_desc":
+                return b.type.localeCompare(a.type, "zh-CN");
+            default:
+                return 0;
             }
         });
     }

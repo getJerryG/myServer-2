@@ -280,22 +280,22 @@ export default class TitleLifecycleManager {
         
         // Handle different status changes
         switch (event.newStatus) {
-            case TitleStatus.EXPIRED:
-                // Handle expired title
-                this.handleExpiredTitle(event);
-                break;
-            case TitleStatus.ACTIVE:
-                // Handle activated title
-                this.handleActivatedTitle(event);
-                break;
-            case TitleStatus.INACTIVE:
-                // Handle deactivated title
-                this.handleDeactivatedTitle(event);
-                break;
-            case TitleStatus.PENDING:
-                // Handle pending title
-                this.handlePendingTitle(event);
-                break;
+        case TitleStatus.EXPIRED:
+            // Handle expired title
+            this.handleExpiredTitle(event);
+            break;
+        case TitleStatus.ACTIVE:
+            // Handle activated title
+            this.handleActivatedTitle(event);
+            break;
+        case TitleStatus.INACTIVE:
+            // Handle deactivated title
+            this.handleDeactivatedTitle(event);
+            break;
+        case TitleStatus.PENDING:
+            // Handle pending title
+            this.handlePendingTitle(event);
+            break;
         }
     }
 

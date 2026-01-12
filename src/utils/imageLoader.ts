@@ -2,8 +2,8 @@
  * 图片加载器工具
  */
 
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 
 // 图片缓存
 const imageCache: Record<string, string> = {};
@@ -21,7 +21,7 @@ export async function findImage(imagePath: string): Promise<string> {
         }
         
         // 构建完整的图片路径
-        const publicPath = path.join(__dirname, '../public');
+        const publicPath = path.join(__dirname, "../public");
         const fullPath = path.join(publicPath, imagePath);
         
         // 检查图片文件是否存在
@@ -31,12 +31,12 @@ export async function findImage(imagePath: string): Promise<string> {
             imageCache[imagePath] = relativePath;
             return relativePath;
         } else {
-            console.error('Image not found:', fullPath);
-            return '';
+            console.error("Image not found:", fullPath);
+            return "";
         }
     } catch (err) {
-        console.error('Error finding image:', imagePath, err);
-        return '';
+        console.error("Error finding image:", imagePath, err);
+        return "";
     }
 }
 
@@ -49,6 +49,6 @@ export async function preloadImages(paths: string[]): Promise<void> {
         const promises = paths.map(path => findImage(path));
         await Promise.all(promises);
     } catch (err) {
-        console.error('Error preloading images:', err);
+        console.error("Error preloading images:", err);
     }
 }

@@ -25,7 +25,7 @@ export const socketAuthMiddleware = async (
 ) => {
     try {
         // 从连接查询参数中获取token
-        const token = socket.handshake.auth.token;
+        const {token} = socket.handshake.auth;
         if (!token) {
             throw new PermissionError("缺少身份验证令牌");
         }

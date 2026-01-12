@@ -217,25 +217,25 @@ export const getCacheStrategy = (key: string) => {
     const prefix = key.split(":")[0];
     
     switch (prefix) {
-        case "user":
-            return CACHE_STRATEGIES.USER_INFO;
-        case "title":
-            if (key.includes("list")) {
-                return CACHE_STRATEGIES.TITLE_LIST;
-            } else if (key.includes("popular")) {
-                return CACHE_STRATEGIES.POPULAR_TITLES;
-            } else {
-                return CACHE_STRATEGIES.TITLE_INFO;
-            }
-        default:
-            return {
-                key,
-                ttl: CACHE_TTL.BASE_TTL,
-                dataStructure: CACHE_DATA_STRUCTURE.STRING,
-                randomOffset: CACHE_RANDOM_OFFSET.SHORT,
-                compress: false,
-                bloomFilter: true,
-                distributedLock: false
-            };
+    case "user":
+        return CACHE_STRATEGIES.USER_INFO;
+    case "title":
+        if (key.includes("list")) {
+            return CACHE_STRATEGIES.TITLE_LIST;
+        } else if (key.includes("popular")) {
+            return CACHE_STRATEGIES.POPULAR_TITLES;
+        } else {
+            return CACHE_STRATEGIES.TITLE_INFO;
+        }
+    default:
+        return {
+            key,
+            ttl: CACHE_TTL.BASE_TTL,
+            dataStructure: CACHE_DATA_STRUCTURE.STRING,
+            randomOffset: CACHE_RANDOM_OFFSET.SHORT,
+            compress: false,
+            bloomFilter: true,
+            distributedLock: false
+        };
     }
 };
