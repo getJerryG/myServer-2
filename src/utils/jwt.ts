@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { IJwtPayload, IAdminJwtPayload } from "~/User";
+import { IJwtPayload } from "~/User";
 
 type ExpiresIn = jwt.SignOptions["expiresIn"];
 
@@ -10,8 +10,8 @@ type ExpiresIn = jwt.SignOptions["expiresIn"];
  * @returns JWT token
  */
 export const createToken = (payload: Omit<IJwtPayload, "iat" | "exp">, expiresIn?: ExpiresIn): string => {
-    expiresIn = expiresIn || (process.env.EXPIRES_IN as ExpiresIn) || "1h";
-    return jwt.sign(payload, process.env.JWT_SECRET as jwt.Secret, { expiresIn });
+    expiresIn = expiresIn || (process.env["EXPIRES_IN"] as ExpiresIn) || "1h";
+    return jwt.sign(payload, process.env["JWT_SECRET"] as jwt.Secret, { expiresIn });
 };
 
 /**
@@ -20,9 +20,9 @@ export const createToken = (payload: Omit<IJwtPayload, "iat" | "exp">, expiresIn
  * @param expiresIn 过期时间
  * @returns JWT token
  */
-export const createAdminToken = (payload: Omit<IAdminJwtPayload, "iat" | "exp">, expiresIn?: ExpiresIn): string => {
-    expiresIn = expiresIn || (process.env.EXPIRES_IN as ExpiresIn) || "1h";
-    return jwt.sign(payload, process.env.JWT_SECRET as jwt.Secret, { expiresIn });
+export const createAdminToken = (payload: Omit<IJwtPayload, "role" | "iat" | "exp">, expiresIn?: ExpiresIn): string => {
+    expiresIn = expiresIn || (process.env["EXPIRES_IN"] as ExpiresIn) || "1h";
+    return jwt.sign(payload, process.env["JWT_SECRET"] as jwt.Secret, { expiresIn });
 };
 
 /**
@@ -30,10 +30,10 @@ export const createAdminToken = (payload: Omit<IAdminJwtPayload, "iat" | "exp">,
  * @param token JWT token
  * @returns 验证后的token载荷
  */
-export const verifyToken = (token: string): IJwtPayload | IAdminJwtPayload | null => {
+export const verifyToken = (token: string): IJwtPayload | null => {
     try {
-        return jwt.verify(token, process.env.JWT_SECRET as jwt.Secret) as IJwtPayload | IAdminJwtPayload;
-    } catch (error) {
+        return jwt.verify(token, process.env["JWT_SECRET"] as jwt.Secret) as IJwtPayload;
+    } catch (_error) {
         return null;
     }
 };
