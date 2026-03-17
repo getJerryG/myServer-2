@@ -44,6 +44,7 @@ pnpm-debug.log*
 .temp/
 
 # 测试覆盖率
+coverage/
 *.lcov
 
 # 系统文件
@@ -86,4 +87,5 @@ contest_audit_report.md
 
 # Redis配置文件
 redis.conf
+
 
