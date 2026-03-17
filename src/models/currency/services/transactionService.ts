@@ -3,6 +3,19 @@ import { ITransaction, TransactionType, TransactionStatus } from "../types/curre
 import UserService from "../../User/services/userService";
 
 /**
+ * 获取用户交易记录的参数接口
+ */
+interface GetUserTransactionsParams {
+    userId: number;
+    page?: number;
+    pageSize?: number;
+    startTime?: Date;
+    endTime?: Date;
+    transactionType?: TransactionType;
+    currencyType?: string;
+}
+
+/**
  * 交易服务类
  */
 export default class TransactionService {
@@ -17,19 +30,6 @@ export default class TransactionService {
      * @param currencyType 货币类型
      * @returns 交易记录列表和总数
      */
-    /**
-     * 获取用户交易记录的参数接口
-     */
-    interface GetUserTransactionsParams {
-        userId: number;
-        page?: number;
-        pageSize?: number;
-        startTime?: Date;
-        endTime?: Date;
-        transactionType?: TransactionType;
-        currencyType?: string;
-    }
-
     static async getUserTransactions(
         params: GetUserTransactionsParams
     ): Promise<{ list: ITransaction[]; total: number }> {

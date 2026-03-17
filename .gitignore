@@ -1,7 +1,8 @@
 
 node_modules/
 .pnpm-store/
-
+.pnpm-lock.yaml
+.pnpm-lock.json
 
 dist/
 build/

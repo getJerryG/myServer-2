@@ -18,6 +18,18 @@ interface IPlayerMatchResult {
 }
 
 /**
+ * 记录选手比赛结果的参数接口
+ */
+interface RecordPlayerMatchResultParams {
+    contestId: string;
+    teamName: string;
+    date: string;
+    round: number;
+    players: IPlayerMatchResult[];
+    operator: string;
+}
+
+/**
  * 竞赛排名服务类
  */
 export default class ContestRankingService {
@@ -425,17 +437,7 @@ export default class ContestRankingService {
      * @param operator 操作人
      * @returns 记录结果
      */
-    /**
-     * 记录选手比赛结果的参数接口
-     */
-    interface RecordPlayerMatchResultParams {
-        contestId: string;
-        teamName: string;
-        date: string;
-        round: number;
-        players: IPlayerMatchResult[];
-        operator: string;
-    }
+
 
     /**
      * 准备选手结果数据

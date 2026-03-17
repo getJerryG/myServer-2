@@ -7,6 +7,18 @@ import UserService from "../../User/services/userService";
 import PlatformWalletService from "./platformWalletService";
 
 /**
+ * 余额变动的参数接口
+ */
+interface BalanceChangeParams {
+    userId: number;
+    currencyType: string;
+    amount: number;
+    transactionType: TransactionType;
+    description?: string;
+    referenceId?: string;
+}
+
+/**
  * 钱包服务类
  */
 export default class WalletService {
@@ -231,17 +243,7 @@ export default class WalletService {
      * @param referenceId 参考ID
      * @returns 更新后的钱包和交易记录
      */
-    /**
-     * 增加余额的参数接口
-     */
-    interface BalanceChangeParams {
-        userId: number;
-        currencyType: string;
-        amount: number;
-        transactionType: TransactionType;
-        description?: string;
-        referenceId?: string;
-    }
+
 
     static async increaseBalance(
         params: BalanceChangeParams
