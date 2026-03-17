@@ -3,6 +3,7 @@ node_modules/
 .pnpm-store/
 .pnpm-lock.yaml
 .pnpm-lock.json
+coverage/
 
 dist/
 build/
@@ -86,4 +87,7 @@ document/
 
 # 审计报告（临时文件）
 contest_audit_report.md
+
+# Redis配置文件
+redis.conf
 
