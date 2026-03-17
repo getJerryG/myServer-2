@@ -1,13 +1,21 @@
 import mongoose, { Schema, Model, Document } from "mongoose";
 import option from "../../../db/model/option";
 import AutoIncrementFactory from "mongoose-sequence";
-
-const AutoIncrement = AutoIncrementFactory(mongoose as any);
 import signInSchema from "./signIn";
 import { IUser } from "@/types/user";
+import { ObjectId } from "mongoose";
 
 interface UserDocument extends IUser, Document {
     id: string;
+    roleIds: ObjectId[];
+    permissionsUpdatedAt?: Date;
+    userID?: string;
+    gamename?: string;
+    exp?: number;
+    signIn?: {
+        signInDays: number;
+        lastSignInTime: Date;
+    };
 }
 
 const userSchema = new Schema<UserDocument>(
@@ -23,6 +31,10 @@ const userSchema = new Schema<UserDocument>(
             required: true,
             unique: true
         },
+        userID: {
+            type: String,
+            required: false
+        },
         session_key: {
             type: String
         },
@@ -30,9 +42,17 @@ const userSchema = new Schema<UserDocument>(
             type: String,
             default: ""
         },
+        gamename: {
+            type: String,
+            default: ""
+        },
         avatar: {
             type: String,
             default: ""
+        },
+        exp: {
+            type: Number,
+            default: 0
         },
         status: {
             type: Number,
@@ -43,8 +63,9 @@ const userSchema = new Schema<UserDocument>(
             default: 0
         },
         user_title: {
-            type: Array,
-            default: []
+            type: [Schema.Types.ObjectId],
+            default: [],
+            ref: "Title"
         },
         sex: {
             type: Number,
@@ -53,20 +74,26 @@ const userSchema = new Schema<UserDocument>(
         permission: {
             type: Number,
             default: 0
+        },
+        roleIds: {
+            type: [Schema.Types.ObjectId],
+            default: []
+        },
+        permissionsUpdatedAt: {
+            type: Date
         }
     },
-    {
-        ...option,
-        discriminatorKey: "kind",
-    }
+    option
 );
 
-// 添加自动递增插件
+// 初始化AutoIncrement插件
+const AutoIncrement = AutoIncrementFactory(mongoose);
 userSchema.plugin(AutoIncrement, { inc_field: "userId" });
+userSchema.index({ roleIds: 1 }, { name: "role_ids_index" });
+userSchema.index({ permissionsUpdatedAt: 1 }, { name: "permissions_updated_at_index" });
 
 const UserModel: Model<UserDocument> = mongoose.model<UserDocument>("User", userSchema, "users");
 
-// 添加签到子文档
 UserModel.discriminator("SignIn", signInSchema);
 
 export default UserModel;

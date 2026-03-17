@@ -8,7 +8,7 @@ export interface TitleStatusChangeEvent {
     newStatus: TitleStatusType;
     changedAt: Date;
     reason?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
 }
 
 export default class TitleLifecycleManager {
@@ -124,7 +124,7 @@ export default class TitleLifecycleManager {
         titleId: string,
         newStatus: TitleStatusType,
         reason?: string,
-        metadata?: Record<string, any>
+        metadata?: Record<string, unknown>
     ): Promise<boolean> {
         const title = titleLibrary.getTitleById(titleId);
         if (!title) {
@@ -275,7 +275,8 @@ export default class TitleLifecycleManager {
      */
     private onStatusChange(event: TitleStatusChangeEvent): void {
         console.log(
-            `Title status changed: ${event.titleId} - ${event.oldStatus} -> ${event.newStatus} (Reason: ${event.reason})`
+            `Title status changed: ${event.titleId} - ${event.oldStatus} -> ` +
+            `${event.newStatus} (Reason: ${event.reason})`
         );
         
         // Handle different status changes

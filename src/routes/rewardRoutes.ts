@@ -1,7 +1,8 @@
 import express from "express";
-import RewardController from "models/Reward/controller";
+
 const router = express.Router();
 
-// ;
-// router.post(__STRING_1__, RewardController.getRewardStats); export default route;
-r;
+// 奖励相关路由
+// TODO: 实现奖励相关功能
+
+export default router;

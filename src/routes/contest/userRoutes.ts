@@ -248,7 +248,7 @@ router.put("/unSignUp", authMiddleware, async (req: Request, res: Response) => {
             userId: userId,
             status: "success"
         }, "取消报名成功");
-    } catch (error) {
+    } catch (_error) {
         resError(res, 500, "取消报名失败");
     }
 });

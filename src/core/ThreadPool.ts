@@ -1,6 +1,13 @@
 import EventEmitter from "events";
 import WorkerHandler from "./WorkerHandler";
 
+// 类型定义
+interface HandlerMessage {
+    taskId: string;
+    result?: unknown;
+    error?: Error;
+}
+
 /**
  * 线程池类
  * @extends EventEmitter
@@ -69,12 +76,12 @@ export default class ThreadPool extends EventEmitter {
      * 处理工作线程消息
      * @param message 消息内容
      */
-    private handleWorkerMessage(message: any): void {
+    private handleWorkerMessage(message: HandlerMessage): void {
         const { taskId, result, error } = message;
         
         if (this.results[ taskId ]) {
             if (error) {
-                this.results[ taskId ].reject(new Error(error.message));
+                this.results[ taskId ].reject(error);
             } else {
                 this.results[ taskId ].resolve(result);
             }

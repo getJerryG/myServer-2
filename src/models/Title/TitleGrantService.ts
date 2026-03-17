@@ -17,7 +17,7 @@ export interface TitleGrantRule {
     validFrom: Date;
     validTo?: Date;
     description: string;
-};
+}
 
 export interface TitleGrantOptions {
     titleId: mongoose.Types.ObjectId;
@@ -26,7 +26,7 @@ export interface TitleGrantOptions {
     grantType: "auto" | "manual";
     grantedBy: mongoose.Types.ObjectId;
     reason?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
 }
 
 export interface GrantRecordQueryOptions {
@@ -43,7 +43,7 @@ export interface GrantRecordQueryOptions {
     page?: number;
     limit?: number;
 
-};
+}
 /**
  * TitleGrantService - 负责头衔授予相关业务逻辑
  */
@@ -56,7 +56,7 @@ export class TitleGrantService {
      * 添加头衔授予规则
      * @param rule 授予规则
      */
-    ule(rule: TitleGrantRule): void {
+    addGrantRule(rule: TitleGrantRule): void {
         this.grantRules.set(rule.id, rule);
         console.log(`Grant rule added: ${rule.id}`);
     }
@@ -65,9 +65,9 @@ export class TitleGrantService {
      * 移除头衔授予规则
      * @param ruleId 规则ID
      */
-    removeGrantRule(ruleId: string): boolean {
+    removeGrantRule(_ruleId: string): boolean {
         // todo 未实现
-        return true
+        return true;
     }
 
     /**
@@ -91,40 +91,49 @@ export class TitleGrantService {
     }
 
     /**
+     * 检查等级条件
+     */
+    private checkLevelCondition(condition: TitleCondition, recipientData: Record<string, unknown>): boolean {
+        if (!condition.level) return true;
+        return (recipientData.level as number) >= condition.level;
+    }
+
+    /**
+     * 检查成就条件
+     */
+    private checkAchievementsCondition(condition: TitleCondition, recipientData: Record<string, unknown>): boolean {
+        if (!condition.requiredAchievements || condition.requiredAchievements.length === 0) return true;
+        const achievements = recipientData.achievements as string[] || [];
+        return condition.requiredAchievements.every(achievement => achievements.includes(achievement));
+    }
+
+    /**
+     * 检查荣誉条件
+     */
+    private checkHonorsCondition(condition: TitleCondition, recipientData: Record<string, unknown>): boolean {
+        if (!condition.requiredHonors || condition.requiredHonors.length === 0) return true;
+        const honors = recipientData.honors as string[] || [];
+        return condition.requiredHonors.every(honor => honors.includes(honor));
+    }
+
+    /**
+     * 检查积分条件
+     */
+    private checkPointsCondition(condition: TitleCondition, recipientData: Record<string, unknown>): boolean {
+        if (!condition.points) return true;
+        return (recipientData.points as number) >= condition.points;
+    }
+
+    /**
      * 检查条件是否满足
      * @param condition 条件
      * @param recipientData 接收者数据
      */
-    checkCondition(condition: TitleCondition, recipientData: any): boolean {
-        // 检查等级条件
-        if (condition.level && recipientData.level < condition.level) {
-            return false;
-        }
-
-        // 检查成就条件
-        if (condition.requiredAchievements && condition.requiredAchievements.length > 0) {
-            for (const achievement of condition.requiredAchievements) {
-                if (!recipientData.achievements || !recipientData.achievements.includes(achievement)) {
-                    return false;
-                }
-            }
-        }
-
-        // 检查荣誉条件
-        if (condition.requiredHonors && condition.requiredHonors.length > 0) {
-            for (const honor of condition.requiredHonors) {
-                if (!recipientData.honors || !recipientData.honors.includes(honor)) {
-                    return false;
-                }
-            }
-        }
-
-    // 检查积分条件
-        if (condition.points && recipientData.points < condition.points) {
-            return false;
-        }
-
-        return true;
+    checkCondition(condition: TitleCondition, recipientData: Record<string, unknown>): boolean {
+        return this.checkLevelCondition(condition, recipientData) &&
+               this.checkAchievementsCondition(condition, recipientData) &&
+               this.checkHonorsCondition(condition, recipientData) &&
+               this.checkPointsCondition(condition, recipientData);
     }
 
     /**
@@ -136,7 +145,7 @@ export class TitleGrantService {
     async checkAutoGrant(
         recipientType: "user" | "clan",
         recipientId: mongoose.Types.ObjectId,
-        recipientData: any
+        recipientData: Record<string, unknown>
     ): Promise<number> {
         const rules = this.getValidGrantRules();
         let grantedCount = 0;
@@ -225,7 +234,7 @@ export class TitleGrantService {
         if (!record) {
          
      
- return null;
+            return null;
         }
 
         // 更新记录状态
@@ -256,20 +265,12 @@ export class TitleGrantService {
     }
 
     /**
-     * 获取授予记录列表
-     * @param options 查询选项
+     * 构建授予记录查询条件
      */
-    static async getGrantRecords(options: GrantRecordQueryOptions = {}): Promise<{
-        records: ITitleGrantRecord[];
-        total: number;
-        page: number;
-        limit: number;
-        totalPages: number;
-    }> {
-        // 构建查询条件
-        const query: any = {};
+    private static buildGrantRecordQuery(options: GrantRecordQueryOptions): Record<string, unknown> {
+        const query: Record<string, unknown> = {};
 
-        if (options.titleId) {        
+        if (options.titleId) {
             query.titleId = options.titleId;
         }
         if (options.recipientType) {
@@ -283,7 +284,7 @@ export class TitleGrantService {
         }
         if (options.grantedBy) {
             query.grantedBy = options.grantedBy;
-          
+        }
         if (options.status && options.status.length > 0) {
             query.status = { $in: options.status };
         }
@@ -294,18 +295,43 @@ export class TitleGrantService {
             query.grantedAt = { ...query.grantedAt, $lte: options.grantedAtTo };
         }
 
+        return query;
+    }
+
+    /**
+     * 构建排序配置
+     */
+    private static buildSortConfig(options: GrantRecordQueryOptions): Record<string, 1 | -1 | "asc" | "desc"> {
+        const sort: Record<string, 1 | -1 | "asc" | "desc"> = {};
+        if (options.sortBy) {
+            sort[options.sortBy] = options.sortOrder || "asc";
+        } else {
+            sort.grantedAt = "desc";
+        }
+        return sort;
+    }
+
+    /**
+     * 获取授予记录列表
+     * @param options 查询选项
+     */
+    static async getGrantRecords(options: GrantRecordQueryOptions = {}): Promise<{
+        records: ITitleGrantRecord[];
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    }> {
+        // 构建查询条件
+        const query = this.buildGrantRecordQuery(options);
+
         // 分页和排序
         const page = options.page || 1;
         const limit = options.limit || 20;
         const skip = (page - 1) * limit;
 
         // 排序配置
-        const sort: any = {};
-        if (options.sortBy) {
-            sort[options.sortBy] = options.sortOrder || "asc";
-        } else {
-            sort.grantedAt = "desc";
-        }
+        const sort = this.buildSortConfig(options);
 
         // 执行查询
         const [records, total] = await Promise.all([
@@ -326,7 +352,7 @@ export class TitleGrantService {
             totalPages
         };
     }
-  
+
     /**
      * 获取单个授予记录
      * @param recordId 记录ID
@@ -340,7 +366,7 @@ export class TitleGrantService {
      * @param recipientType 接收者类型
      * @param recipientId 接收者ID
      * @param options 查询选项
-     */ 
+     */
     static async getGrantRecordsByRecipient(
         recipientType: "user" | "clan",
         recipientId: mongoose.Types.ObjectId,
@@ -381,14 +407,12 @@ export class TitleGrantService {
     }
 
     /**
-     * 获取授予统计信息
-     * @param options 查询选项
+     * 构建统计查询条件
      */
-    static async getGrantStatistics(
-        options: Omit<GrantRecordQueryOptions, "page" | "limit" | "sortBy" | "sortOrder"> = {}
-    ): Promise<any> {
-        // 构建查询条件
-        const query: any = {};
+    private static buildStatisticsQuery(
+        options: Omit<GrantRecordQueryOptions, "page" | "limit" | "sortBy" | "sortOrder">
+    ): Record<string, unknown> {
+        const query: Record<string, unknown> = {};
 
         if (options.titleId) {
             query.titleId = options.titleId;
@@ -412,8 +436,14 @@ export class TitleGrantService {
             query.grantedAt = { ...query.grantedAt, $lte: options.grantedAtTo };
         }
 
-        // 执行聚合查询
-        const [totalCount, byRecipientType, byGrantType, byStatus, byTitle] = await Promise.all([
+        return query;
+    }
+
+    /**
+     * 执行聚合查询
+     */
+    private static async executeAggregationQueries(query: Record<string, unknown>) {
+        return await Promise.all([
             TitleGrantRecord.countDocuments(query),
             TitleGrantRecord.aggregate([
                 { $match: query },
@@ -434,25 +464,54 @@ export class TitleGrantService {
                 { $limit: 10 }
             ])
         ]);
+    }
+
+    /**
+     * 格式化聚合结果
+     */
+    private static formatAggregationResults(results: [
+        number,
+        Array<{ _id: string; count: number }>,
+        Array<{ _id: string; count: number }>,
+        Array<{ _id: string; count: number }>,
+        Array<{ _id: mongoose.Types.ObjectId; count: number }>
+    ]) {
+        const [totalCount, byRecipientType, byGrantType, byStatus, byTitle] = results;
 
         // 格式化统计结果
-        const stats = {
+        return {
             total: totalCount,
-            byRecipientType: byRecipientType.reduce((acc: any, item: any) => {
+            byRecipientType: byRecipientType.reduce(
+                (acc: Record<string, number>, item: { _id: string, count: number }) => {
+                    acc[item._id] = item.count;
+                    return acc;
+                }, {}),
+            byGrantType: byGrantType.reduce((acc: Record<string, number>, item: { _id: string, count: number }) => {
                 acc[item._id] = item.count;
                 return acc;
             }, {}),
-            byGrantType: byGrantType.reduce((acc: any, item: any) => {
-                acc[item._id] = item.count;
-                return acc;
-            }, {}),
-            byStatus: byStatus.reduce((acc: any, item: any) => {
+            byStatus: byStatus.reduce((acc: Record<string, number>, item: { _id: string, count: number }) => {
                 acc[item._id] = item.count;
                 return acc;
             }, {}),
             topTitles: byTitle
         };
+    }
 
-        return stats;
+    /**
+     * 获取授予统计信息
+     * @param options 查询选项
+     */
+    static async getGrantStatistics(
+        options: Omit<GrantRecordQueryOptions, "page" | "limit" | "sortBy" | "sortOrder"> = {}
+    ): Promise<Record<string, unknown>> {
+        // 构建查询条件
+        const query = this.buildStatisticsQuery(options);
+
+        // 执行聚合查询
+        const results = await this.executeAggregationQueries(query);
+
+        // 格式化统计结果
+        return this.formatAggregationResults(results);
     }
 }

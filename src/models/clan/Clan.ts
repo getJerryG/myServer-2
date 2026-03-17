@@ -309,14 +309,12 @@ export default class Clan {
     /**
      * 处理比赛结果
      */
-    processContestResult(records: Record<string, unknown>) {
+    processContestResult(_records: Record<string, unknown>) {
         const {members} = this;
         members.forEach((member) => {
             this.getMember(member.nickName)?.addExp(10);
         });
         
-        for (const record of Object.values(records)) {
-            // 这里可以添加比赛结果处理逻辑
-        }
+        // 比赛结果处理逻辑待实现
     }
 }

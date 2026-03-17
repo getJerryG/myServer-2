@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import UserService from "@/models/User/services/userService";
-import { resSuccess, resBadRequest, resUnauthorized, resNotFound, resForbidden, resInternalServerError } from "@/utils/res";
-import User from "@/models/User";
+import { resSuccess, resBadRequest, resUnauthorized, resNotFound, resInternalServerError } from "@/utils/res";
 
 /**
  * 用户控制器
@@ -15,16 +14,19 @@ export default class UserController {
      */
     static async getUser(req: Request, res: Response) {
         try {
+            console.log("getUser controller called");
+            console.log("req.user:", req.user);
             const userId = req.user?.userId;
+            console.log("userId:", userId);
             if (!userId) {
                 return resUnauthorized(res, "未授权");
             }
             
             const userInfo = await UserService.getUser(userId);
+            console.log("userInfo:", userInfo);
             if (!userInfo) {
                 return resNotFound(res, "用户不存在");
             }
-            console.log(userInfo);
             
             return resSuccess(res, userInfo, "获取用户信息成功");
         } catch (error) {
@@ -98,7 +100,7 @@ export default class UserController {
      */
     static async getOtherUser(req: Request, res: Response) {
         try {
-            const { userId } = req.query;
+            const { userId } = req.params;
             if (!userId || isNaN(Number(userId))) {
                 return resBadRequest(res, "无效的用户ID");
             }

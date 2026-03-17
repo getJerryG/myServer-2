@@ -71,7 +71,9 @@ export default class UserService {
             
             user = await Promise.race([cachePromise, timeoutPromise]);
         } catch (_error) {
-            return new Error("Redis操作超时,现在从数据库查询");
+            console.warn("Redis缓存获取失败，从数据库查询:", _error);
+            // 超时后从数据库获取，而不是返回Error
+            user = null;
         }
         
         if (user) {

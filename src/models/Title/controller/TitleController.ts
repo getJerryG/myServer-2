@@ -14,8 +14,8 @@ export interface TitleDisplayItem {
     expiredAt?: string;
     remainingTime?: number;
     isExpired: boolean;
-    conditions: any;
-    displayInfo?: Record<string, any>;
+    conditions: Record<string, unknown>;
+    displayInfo?: Record<string, unknown>;
 }
 
 export default class TitleController {
@@ -29,7 +29,7 @@ export default class TitleController {
      * 创建头衔
      * @param input 输入参数
      */
-    async createTitle(input: any): Promise<TitleDisplayItem> {
+    async createTitle(input: Record<string, unknown>): Promise<TitleDisplayItem> {
         if (!input.title || !input.type || !input.description) {
             throw new Error("title, type, and description are required");
         }
@@ -73,7 +73,7 @@ export default class TitleController {
      * @param id 头衔ID
      * @param input 输入参数
      */
-    async updateTitle(id: string, input: any): Promise<TitleDisplayItem | null> {
+    async updateTitle(id: string, input: Record<string, unknown>): Promise<TitleDisplayItem | null> {
         if (!id) {
             throw new Error("id is required");
         }
@@ -147,7 +147,7 @@ export default class TitleController {
      * 查询头衔列表
      * @param query 查询参数
      */
-    async queryTitles(query: any): Promise<{
+    async queryTitles(query: Record<string, unknown>): Promise<{
         titles: TitleDisplayItem[];
         total: number;
         page: number;
@@ -222,7 +222,7 @@ export default class TitleController {
             id: title.id,
             title: title.title,
             description: title.description,
-            type: title.type as any,
+            type: title.type,
             image: title.image,
             status: title.status,
             rarity: title.rarity,

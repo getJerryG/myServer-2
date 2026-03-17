@@ -18,4 +18,4 @@ export default interface IRoom extends Document {
         seatId: number;
     }>;
     flowMessage: object;
-};;;;;;;;;;;;;;;;;;;;
+};

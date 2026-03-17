@@ -7,7 +7,7 @@
  * @param className 要创建单例的类
  * @returns 单例实例的构造函数
  */
-export default function singleton<T extends new (...args: unknown[]) => any>(className: T): T {
+export default function singleton<T extends new (...args: unknown[]) => object>(className: T): T {
     let instance: InstanceType<T>;
     
     // 返回一个代理构造函数

@@ -14,7 +14,7 @@ export default class UserTitleController {
      * @param userId 用户ID
      * @param input 输入参数
      */
-    async grantTitleToUser(userId: string, input: any): Promise<any> {
+    async grantTitleToUser(userId: string, input: Record<string, unknown>): Promise<Record<string, unknown>> {
         if (!userId || !input.titleId) {
             throw new Error("userId and titleId are required");
         }
@@ -40,7 +40,7 @@ export default class UserTitleController {
      * @param userId 用户ID
      * @param userTitleId 用户头衔ID
      */
-    async equipTitle(userId: string, userTitleId: string): Promise<any> {
+    async equipTitle(userId: string, userTitleId: string): Promise<Record<string, unknown> | null> {
         if (!userId || !userTitleId) {
             throw new Error("userId and userTitleId are required");
         }
@@ -86,9 +86,9 @@ export default class UserTitleController {
      */
     async getUserTitles(
         userId: string,
-        query: any = {}
+        query: Record<string, unknown> = {}
     ): Promise<{
-        titles: any[];
+        titles: Record<string, unknown>[];
         total: number;
         page: number;
         limit: number;
@@ -126,7 +126,7 @@ export default class UserTitleController {
      * 获取用户已装备的头衔
      * @param userId 用户ID
      */
-    async getUserEquippedTitle(userId: string): Promise<any> {
+    async getUserEquippedTitle(userId: string): Promise<Record<string, unknown> | null> {
         if (!userId) {
             throw new Error("userId is required");
         }
@@ -189,7 +189,7 @@ export default class UserTitleController {
      * 获取用户头衔统计信息
      * @param userId 用户ID
      */
-    async getUserTitleStatistics(userId: string): Promise<any> {
+    async getUserTitleStatistics(userId: string): Promise<Record<string, unknown>> {
         if (!userId) {
             throw new Error("userId is required");
         }
@@ -247,8 +247,8 @@ export default class UserTitleController {
      * 格式化用户头衔响应
      * @param userTitle 用户头衔对象
      */
-    private formatUserTitleResponse(userTitle: IUserTitle): any {
-        const response: any = {
+    private formatUserTitleResponse(userTitle: IUserTitle): Record<string, unknown> {
+        const response: Record<string, unknown> = {
             _id: userTitle._id,
             userId: userTitle.userId,
             titleId: userTitle.titleId,
@@ -260,15 +260,24 @@ export default class UserTitleController {
         };
 
         // 如果titleId是populated的，添加titleInfo
-        if (userTitle.titleId && typeof userTitle.titleId !== "string" && userTitle.titleId.id) {
+        if (userTitle.titleId && typeof userTitle.titleId !== "string" && "id" in userTitle.titleId) {
+            const titleObj = userTitle.titleId as {
+                id: string;
+                title: string;
+                description: string;
+                type: string;
+                image?: string;
+                rarity: string;
+                category: string;
+            };
             response.titleInfo = {
-                id: (userTitle.titleId as any).id,
-                title: (userTitle.titleId as any).title,
-                description: (userTitle.titleId as any).description,
-                type: (userTitle.titleId as any).type,
-                image: (userTitle.titleId as any).image,
-                rarity: (userTitle.titleId as any).rarity,
-                category: (userTitle.titleId as any).category
+                id: titleObj.id,
+                title: titleObj.title,
+                description: titleObj.description,
+                type: titleObj.type,
+                image: titleObj.image,
+                rarity: titleObj.rarity,
+                category: titleObj.category
             };
         }
 

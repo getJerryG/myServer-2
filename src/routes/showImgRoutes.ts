@@ -19,7 +19,7 @@ router.get("/", async (req: Request, res: Response) => {
         const targetDirectory = path.join("public", "images", "ad");
         
         // 异步查找图片路径的函数
-        const findImagePathsAsync = async (directory: string): Promise<string[]> => {
+        const findImagePathsAsync = async (_directory: string): Promise<string[]> => {
             // 实现异步查找图片路径的逻辑
             return [];
         };
@@ -30,7 +30,7 @@ router.get("/", async (req: Request, res: Response) => {
         Cache.set("imagePaths", imagePathsFromDisk, 60 * 60);
         
         resSuccess(res, imagePathsFromDisk, "获取图片列表成功");
-    } catch (error) {
+    } catch (_error) {
         resError(res, 500, "获取图片列表失败");
     }
 });

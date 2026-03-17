@@ -161,7 +161,9 @@ export default class ContestDay {
      * @returns 是否准时
      */
     isEnterRoomOnTime(time: string): boolean {
-        return this.compareTime(time, this.enterRoomStartTime) >= 0 && this.compareTime(time, this.enterRoomEndTime) <= 0;
+        const isAfterStartTime = this.compareTime(time, this.enterRoomStartTime) >= 0;
+        const isBeforeEndTime = this.compareTime(time, this.enterRoomEndTime) <= 0;
+        return isAfterStartTime && isBeforeEndTime;
     }
 
     /**

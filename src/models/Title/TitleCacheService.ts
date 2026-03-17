@@ -179,7 +179,7 @@ export default class TitleCacheService {
      * @returns 统计信息
      */
     static async getTitleStatsFromCache(): Promise<Record<string, unknown> | undefined> {
-        return RedisCacheManager.get<any>(TitleCacheKeys.TITLE_STATS);
+        return RedisCacheManager.get<Record<string, unknown>>(TitleCacheKeys.TITLE_STATS);
     }
 
     /**

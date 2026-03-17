@@ -4,7 +4,7 @@ import WalletService from "../models/currency/services/walletService";
 import TransactionService from "../models/currency/services/transactionService";
 import PlatformWalletService from "../models/currency/services/platformWalletService";
 import UserService from "../models/User/services/userService";
-import { CurrencyStatus, WalletStatus, TransactionType, TransactionStatus } from "../models/currency/types/currency";
+import { TransactionType } from "../models/currency/types/currency";
 import auth from "@/middlewares/auth";
 import { Admin, SuperAdmin } from "@/middlewares/role";
 import { resSuccess, resCreated, resError, resBadRequest, resNotFound } from "../utils/res";

@@ -24,7 +24,7 @@ export function writeJsonFile(path: string, data: Record<string, unknown>): void
  * @param path 文件路径
  * @returns 文件内容
  */
-export function readJsonFile<T = any>(path: string): T {
+export function readJsonFile<T = unknown>(path: string): T {
     try {
         const fileData = fs.readFileSync(path, "utf8");
         return JSON.parse(fileData) as T;
@@ -43,7 +43,7 @@ export function updateJsonFile(path: string, data: Record<string, unknown>): voi
     try {
         // 读取现有数据
         const fileData = fs.readFileSync(path, "utf8");
-        const parsedData: Record<string, any> = JSON.parse(fileData);
+        const parsedData: Record<string, unknown> = JSON.parse(fileData);
         
         // 合并新数据
         const updatedData = {

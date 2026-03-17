@@ -1,6 +1,34 @@
 import { Socket } from "socket.io";
-import { RoomErrorType, IErrorEvent } from "../types/room";
 import type { Request, Response, NextFunction } from "express";
+
+/**
+ * 房间错误类型枚举
+ */
+export enum RoomErrorType {
+    PERMISSION_DENIED = "PERMISSION_DENIED",
+    INVALID_SEAT = "INVALID_SEAT",
+    ROOM_FULL = "ROOM_FULL",
+    ROOM_NOT_EXIST = "ROOM_NOT_EXIST",
+    USER_NOT_IN_ROOM = "USER_NOT_IN_ROOM",
+    GAME_ALREADY_STARTED = "GAME_ALREADY_STARTED",
+    GAME_NOT_STARTED = "GAME_NOT_STARTED",
+    INVALID_OPERATION = "INVALID_OPERATION",
+    INVALID_PARAMETER = "INVALID_PARAMETER",
+    INTERNAL_ERROR = "INTERNAL_ERROR",
+    PLAYER_NOT_FOUND = "PLAYER_NOT_FOUND",
+    INVALID_STATE = "INVALID_STATE",
+    PLAYER_DEAD = "PLAYER_DEAD"
+}
+
+/**
+ * 错误事件接口
+ */
+export interface IErrorEvent {
+    type: "ERROR";
+    code: string;
+    message: string;
+    timestamp: number;
+}
 
 /**
  * 房间错误类，继承自 Error

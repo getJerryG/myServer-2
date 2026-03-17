@@ -1,5 +1,26 @@
-import { Worker, MessagePort, MessageChannel } from "worker_threads";
+import { Worker } from "worker_threads";
 import EventEmitter from "events";
+
+// 类型定义
+interface WorkerResultMessage {
+    type: "TASK_COMPLETED";
+    taskId: string;
+    result: unknown;
+}
+
+interface WorkerErrorMessage {
+    type: "TASK_FAILED";
+    taskId: string;
+    error: string;
+}
+
+type WorkerMessage = WorkerResultMessage | WorkerErrorMessage;
+
+interface HandlerMessage {
+    taskId: string;
+    result?: unknown;
+    error?: Error;
+}
 
 /**
  * 工作线程处理器
@@ -73,19 +94,19 @@ class WorkerHandler extends EventEmitter {
      * 设置事件监听器
      */
     private setupEventListeners(): void {
-        this.worker.on("message", (message: any) => {
+        this.worker.on("message", (message: WorkerMessage) => {
             if (message.type === "TASK_COMPLETED") {
                 this.isBusy = false;
                 this.emit("message", { 
                     taskId: message.taskId, 
                     result: message.result 
-                });
+                } as HandlerMessage);
             } else if (message.type === "TASK_FAILED") {
                 this.isBusy = false;
                 this.emit("message", { 
                     taskId: message.taskId, 
                     error: new Error(message.error) 
-                });
+                } as HandlerMessage);
             }
         });
         

@@ -1,12 +1,10 @@
 import Clan from "../data/clan";
 import ClanMember from "../data/clanMember";
 import UserService from "models/User/services/userService";
-import UserModel from "models/User/models/users";
 import {
     IClan,
     IClanCreate,
     IClanUpdate,
-    IClanMember,
     IClanListQuery,
     IClanMemberListQuery,
     IClanListResponse,
@@ -14,7 +12,6 @@ import {
     IClanDetail,
     MemberRole 
 } from "../types/clan";
-import mongoose from "mongoose";
 
 /**
  * 家族服务类

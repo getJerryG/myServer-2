@@ -77,13 +77,9 @@ const roomsSchema = new Schema<IRoom>({
 });
 
 // 创建索引
-roomsSchema.index({ openId: 1 }, { unique: true, name: "openId_unique_index" });
-roomsSchema.index({ userId: 1 }, { unique: true, name: "userId_unique_index" });
-roomsSchema.index({ role: 1, status: 1 }, { name: "role_status_index" });
+roomsSchema.index({ roomId: 1 }, { unique: true, name: "roomId_unique_index" });
 roomsSchema.index({ createTime: 1 }, { name: "createTime_index" });
 roomsSchema.index({ updateTime: 1 }, { name: "updateTime_index" });
-roomsSchema.index({ lastLoginTime: 1 }, { name: "lastLoginTime_index" });
-roomsSchema.index({ userId: 1, member: 1 }, { name: "userId_member_index" });
 
 // 房间模型
 const RoomModel: Model<IRoom> = mongoose.model<IRoom>("Rooms", roomsSchema, "rooms");

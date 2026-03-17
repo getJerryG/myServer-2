@@ -17,16 +17,33 @@ export default class TransactionService {
      * @param currencyType 货币类型
      * @returns 交易记录列表和总数
      */
+    /**
+     * 获取用户交易记录的参数接口
+     */
+    interface GetUserTransactionsParams {
+        userId: number;
+        page?: number;
+        pageSize?: number;
+        startTime?: Date;
+        endTime?: Date;
+        transactionType?: TransactionType;
+        currencyType?: string;
+    }
+
     static async getUserTransactions(
-        userId: number,
-        page = 1,
-        pageSize = 10,
-        startTime?: Date,
-        endTime?: Date,
-        transactionType?: TransactionType,
-        currencyType?: string
+        params: GetUserTransactionsParams
     ): Promise<{ list: ITransaction[]; total: number }> {
         try {
+            const { 
+                userId, 
+                page = 1, 
+                pageSize = 10, 
+                startTime, 
+                endTime, 
+                transactionType, 
+                currencyType 
+            } = params;
+
             // 验证用户是否存在
             const user = await UserService.getUser(userId);
             if (!user) {
@@ -37,12 +54,14 @@ export default class TransactionService {
             const query: Partial<ITransaction> = { userId: user._id };
             
             // 时间范围条件
-            if (startTime && endTime) {
-                query.createdAt = { $gte: startTime, $lte: endTime };
-            } else if (startTime) {
-                query.createdAt = { $gte: startTime };
-            } else if (endTime) {
-                query.createdAt = { $lte: endTime };
+            if (startTime || endTime) {
+                query.createdAt = {};
+                if (startTime) {
+                    (query.createdAt as any).$gte = startTime;
+                }
+                if (endTime) {
+                    (query.createdAt as any).$lte = endTime;
+                }
             }
 
             // 交易类型条件
@@ -67,7 +86,7 @@ export default class TransactionService {
             
             return { list, total };
         } catch (error) {
-            console.error(`获取用户交易记录失败 ${userId}:`, error);
+            console.error(`获取用户交易记录失败 ${params.userId}:`, error);
             throw error;
         }
     }

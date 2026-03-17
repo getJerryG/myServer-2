@@ -214,6 +214,92 @@ export default class TitleService {
     }
 
     /**
+     * 添加状态筛选条件
+     */
+    private static addStatusFilter(query: Record<string, unknown>, options: TitleQueryOptions) {
+        if (options.status && options.status.length > 0) {
+            query.status = { $in: options.status };
+        }
+    }
+
+    /**
+     * 添加类型筛选条件
+     */
+    private static addTypeFilter(query: Record<string, unknown>, options: TitleQueryOptions) {
+        if (options.type && options.type.length > 0) {
+            query.type = { $in: options.type };
+        }
+    }
+
+    /**
+     * 添加分类筛选条件
+     */
+    private static addCategoryFilter(query: Record<string, unknown>, options: TitleQueryOptions) {
+        if (options.category && options.category.length > 0) {
+            query.category = { $in: options.category };
+        }
+    }
+
+    /**
+     * 添加稀有度筛选条件
+     */
+    private static addRarityFilter(query: Record<string, unknown>, options: TitleQueryOptions) {
+        if (options.rarity && options.rarity.length > 0) {
+            query.rarity = { $in: options.rarity };
+        }
+    }
+
+    /**
+     * 添加时间限制筛选条件
+     */
+    private static addTimeLimitedFilter(query: Record<string, unknown>, options: TitleQueryOptions) {
+        if (options.isTimeLimited !== undefined) {
+            query.isTimeLimited = options.isTimeLimited;
+        }
+    }
+
+    /**
+     * 添加搜索关键词筛选条件
+     */
+    private static addSearchFilter(query: Record<string, unknown>, options: TitleQueryOptions) {
+        if (options.searchKeyword) {
+            const keyword = new RegExp(options.searchKeyword, "i");
+            query.$or = [{ title: keyword }, { description: keyword }];
+        }
+    }
+
+    /**
+     * 构建头衔查询条件
+     * @param options 查询选项
+     */
+    private static buildTitleQuery(options: TitleQueryOptions): Record<string, unknown> {
+        const query: Record<string, unknown> = {};
+        
+        this.addStatusFilter(query, options);
+        this.addTypeFilter(query, options);
+        this.addCategoryFilter(query, options);
+        this.addRarityFilter(query, options);
+        this.addTimeLimitedFilter(query, options);
+        this.addSearchFilter(query, options);
+
+        return query;
+    }
+
+    /**
+     * 构建头衔排序配置
+     * @param options 查询选项
+     */
+    private static buildTitleSort(options: TitleQueryOptions): Record<string, 1 | -1> {
+        const sort: Record<string, 1 | -1> = {};
+        if (options.sortBy) {
+            sort[options.sortBy] = options.sortOrder || "asc";
+        } else {
+            sort.createdAt = "desc";
+        }
+        return sort;
+    }
+
+    /**
      * 查询头衔列表
      * @param options 查询选项
      * @returns 头衔列表及分页信息
@@ -221,38 +307,8 @@ export default class TitleService {
     static async queryTitles(
         options: TitleQueryOptions = {}
     ): Promise<{ titles: ITitle[]; total: number; page: number; limit: number; totalPages: number }> {
-        const query: Record<string, unknown> = {};
-        
-        // 添加状态筛选
-        if (options.status && options.status.length > 0) {
-            query.status = { $in: options.status };
-        }
-        
-        // 添加类型筛选
-        if (options.type && options.type.length > 0) {
-            query.type = { $in: options.type };
-        }
-        
-        // 添加分类筛选
-        if (options.category && options.category.length > 0) {
-            query.category = { $in: options.category };
-        }
-        
-        // 添加稀有度筛选
-        if (options.rarity && options.rarity.length > 0) {
-            query.rarity = { $in: options.rarity };
-        }
-        
-        // 添加时间限制筛选
-        if (options.isTimeLimited !== undefined) {
-            query.isTimeLimited = options.isTimeLimited;
-        }
-        
-        // 添加搜索关键词筛选
-        if (options.searchKeyword) {
-            const keyword = new RegExp(options.searchKeyword, "i");
-            query.$or = [{ title: keyword }, { description: keyword }];
-        }
+        // 构建查询条件
+        const query = this.buildTitleQuery(options);
 
         // 分页参数
         const page = options.page || 1;
@@ -260,12 +316,7 @@ export default class TitleService {
         const skip = (page - 1) * limit;
 
         // 排序参数
-        const sort: Record<string, 1 | -1> = {};
-        if (options.sortBy) {
-            sort[options.sortBy] = options.sortOrder || "asc";
-        } else {
-            sort.createdAt = "desc";
-        }
+        const sort = this.buildTitleSort(options);
 
         // 执行查询
         const [titles, total] = await Promise.all([
@@ -407,7 +458,7 @@ export default class TitleService {
      * 获取头衔统计信息
      * @returns 头衔统计信息
      */
-    static async getTitleStatistics(): Promise<any> {
+    static async getTitleStatistics(): Promise<Record<string, unknown>> {
         // 尝试从缓存获取
         const cachedStats = await TitleCacheService.getTitleStatsFromCache();
         if (cachedStats) {
@@ -426,22 +477,23 @@ export default class TitleService {
         // 格式化统计信息
         const stats = {
             total: totalCount,
-            byStatus: statusStats.reduce((acc: any, item: any) => {
+            byStatus: statusStats.reduce((acc: Record<string, number>, item: { _id: string, count: number }) => {
                 acc[item._id] = item.count;
                 return acc;
             }, {}),
-            byType: typeStats.reduce((acc: any, item: any) => {
+            byType: typeStats.reduce((acc: Record<string, number>, item: { _id: string, count: number }) => {
                 acc[item._id] = item.count;
                 return acc;
             }, {}),
-            byRarity: rarityStats.reduce((acc: any, item: any) => {
+            byRarity: rarityStats.reduce((acc: Record<string, number>, item: { _id: string, count: number }) => {
                 acc[item._id] = item.count;
                 return acc;
             }, {}),
-            byTimeLimited: timeLimitedStats.reduce((acc: any, item: any) => {
-                acc[item._id ? "timeLimited" : "permanent"] = item.count;
-                return acc;
-            }, {})
+            byTimeLimited: timeLimitedStats.reduce(
+                (acc: Record<string, number>, item: { _id: boolean, count: number }) => {
+                    acc[item._id ? "timeLimited" : "permanent"] = item.count;
+                    return acc;
+                }, {}),
         };
 
         // 缓存统计信息

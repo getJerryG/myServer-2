@@ -21,7 +21,7 @@ export class DBOptimizer {
         idField: string = "_id"
     ): Promise<string | null> {
         try {
-            const entity = await model.findOne(query).select(idField).lean() as Record<string, any>;
+            const entity = await model.findOne(query).select(idField).lean() as Record<string, unknown>;
             if (!entity) {
                 return null;
             }

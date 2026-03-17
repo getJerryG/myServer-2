@@ -83,22 +83,39 @@ playerResultSchema.index({ scheduleId: 1 }, { name: "playerResult_scheduleId_ind
 playerResultSchema.index({ registrationId: 1 }, { name: "playerResult_registrationId_index" });
 playerResultSchema.index({ matchId: 1 }, { name: "playerResult_matchId_index" });
 playerResultSchema.index({ userId: 1 }, { name: "playerResult_userId_index" });
-playerResultSchema.index({ contestId: 1, scheduleId: 1, teamName: 1 }, { name: "playerResult_contest_schedule_team_index" });
+playerResultSchema.index(
+    { contestId: 1, scheduleId: 1, teamName: 1 }, 
+    { name: "playerResult_contest_schedule_team_index" }
+);
 playerResultSchema.index({ contestId: 1, userId: 1 }, { name: "playerResult_contest_user_index" });
 
-playerResultSchema.statics.getPlayerResultsByMatch = async function (contestId: string, scheduleId: string, teamName: string) {
+playerResultSchema.statics.getPlayerResultsByMatch = async function (
+    contestId: string, 
+    scheduleId: string, 
+    teamName: string
+) {
     return await this.find({ contestId, scheduleId, teamName });
 };
 
-playerResultSchema.statics.getPlayerResultsByUser = async function (contestId: string, userId: number) {
+playerResultSchema.statics.getPlayerResultsByUser = async function (
+    contestId: string, 
+    userId: number
+) {
     return await this.find({ contestId, userId }).sort({ createdAt: -1 });
 };
 
-playerResultSchema.statics.getPlayerResultsBySchedule = async function (contestId: string, scheduleId: string) {
+playerResultSchema.statics.getPlayerResultsBySchedule = async function (
+    contestId: string, 
+    scheduleId: string
+) {
     return await this.find({ contestId, scheduleId });
 };
 
-playerResultSchema.statics.deletePlayerResultsByMatch = async function (contestId: string, scheduleId: string, teamName: string) {
+playerResultSchema.statics.deletePlayerResultsByMatch = async function (
+    contestId: string, 
+    scheduleId: string, 
+    teamName: string
+) {
     return await this.deleteMany({ contestId, scheduleId, teamName });
 };
 

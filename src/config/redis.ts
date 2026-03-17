@@ -99,12 +99,11 @@ const redis = new Redis(redisConfig);
 
 // 添加Promise接口，用于等待Redis连接成功
 let redisConnected = false;
-let redisConnectPromise: Promise<void>;
 let resolveRedisConnect: () => void;
 let rejectRedisConnect: (error: Error) => void;
 
 // 初始化Promise
-redisConnectPromise = new Promise((resolve, reject) => {
+const redisConnectPromise: Promise<void> = new Promise((resolve, reject) => {
     resolveRedisConnect = resolve;
     rejectRedisConnect = reject;
 });

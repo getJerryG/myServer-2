@@ -1,4 +1,4 @@
-export type StatusFromBase<T extends string> = T extends `${infer _Status}` 
+export type StatusFromBase<T extends string> = T extends `${infer Status}` 
     ? T 
     : never;
 
@@ -65,28 +65,28 @@ export type DeepRequired<T> = {
         : T[P];
 };
 
-export type UnionToIntersection<U> = (U extends any 
+export type UnionToIntersection<U> = (U extends unknown 
     ? (k: U) => void 
     : never) extends (k: infer I) => void 
         ? I 
         : never;
 
-export type LastOf<T> = UnionToIntersection<T> extends infer U 
-    ? U extends { [infer L, ...infer R] } 
-        ? LastOf<R> 
-        : U 
-    : never;
+export type LastOf<T> = T extends readonly [...infer Rest, infer L] 
+    ? L 
+    : T extends readonly [infer L] 
+        ? L 
+        : never;
 
-export type FirstOf<T> = T extends [infer F, ...infer _] 
+export type FirstOf<T> = T extends [infer F, ...infer Rest] 
     ? F 
     : never;
 
-export type Head<T> = T extends [infer H, ...infer _] 
+export type Head<T> = T extends [infer H, ...infer Rest] 
     ? H 
     : never;
 
-export type Tail<T> = T extends [infer _, ...infer T] 
-    ? T 
+export type Tail<T> = T extends [infer _, ...infer Rest] 
+    ? Rest 
     : never;
 
 export type Length<T> = T extends { length: infer L } 
@@ -167,23 +167,20 @@ export type ReplaceAll<S extends string, From extends string, To extends string>
         ? `${Before}${To}${ReplaceAll<After, From, To>}` 
         : S;
 
-export type StringIncludes<S extends string, Search extends string> = S extends `${infer _}${Search}${infer _}` 
+export type StringIncludes<S extends string, Search extends string> = S extends `${infer Before}${Search}${infer After}` 
     ? true 
     : false;
 
-export type StringStartsWith<S extends string, Prefix extends string> = S extends `${Prefix}${infer _}` 
+export type StringStartsWith<S extends string, Prefix extends string> = S extends `${Prefix}${infer Rest}` 
     ? true 
     : false;
 
-export type StringEndsWith<S extends string, Suffix extends string> = S extends `${infer _}${Suffix}` 
+export type StringEndsWith<S extends string, Suffix extends string> = S extends `${infer Rest}${Suffix}` 
     ? true 
     : false;
 
-export type StringLength<S extends string> = S extends `${infer _}${infer Rest}` 
-    ? Rest extends "" 
-        ? 1 
-        : StringLength<Rest> + 1 
-    : 0;
+// 简化的字符串长度计算
+export type StringLength<S extends string> = S["length"];
 
 export type ToUpperCase<S extends string> = Uppercase<S>;
 

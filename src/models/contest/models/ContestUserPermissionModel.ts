@@ -57,15 +57,26 @@ contestUserPermissionSchema.statics.findByUserId = async function (userId: mongo
     return await this.find({ user_id: userId }).populate(["user_id", "contest_id"]);
 };
 
-contestUserPermissionSchema.statics.findByContestId = async function (contestId: mongoose.Types.ObjectId) {
-    return await this.find({ contest_id: contestId }).populate(["user_id", "contest_id"]);
+contestUserPermissionSchema.statics.findByContestId = async function (
+    contestId: mongoose.Types.ObjectId
+) {
+    return await this.find({ contest_id: contestId })
+        .populate(["user_id", "contest_id"]);
 };
 
-contestUserPermissionSchema.statics.findByUserIdAndContestId = async function (userId: mongoose.Types.ObjectId, contestId: mongoose.Types.ObjectId) {
-    return await this.findOne({ user_id: userId, contest_id: contestId }).populate(["user_id", "contest_id"]);
+contestUserPermissionSchema.statics.findByUserIdAndContestId = async function (
+    userId: mongoose.Types.ObjectId, 
+    contestId: mongoose.Types.ObjectId
+) {
+    return await this.findOne({ user_id: userId, contest_id: contestId })
+        .populate(["user_id", "contest_id"]);
 };
 
-contestUserPermissionSchema.statics.updatePermission = async function (userId: mongoose.Types.ObjectId, contestId: mongoose.Types.ObjectId, updateData: Partial<IContestUserPermission>) {
+contestUserPermissionSchema.statics.updatePermission = async function (
+    userId: mongoose.Types.ObjectId, 
+    contestId: mongoose.Types.ObjectId, 
+    updateData: Partial<IContestUserPermission>
+) {
     return await this.findOneAndUpdate(
         { user_id: userId, contest_id: contestId },
         updateData,
@@ -73,7 +84,10 @@ contestUserPermissionSchema.statics.updatePermission = async function (userId: m
     ).populate(["user_id", "contest_id"]);
 };
 
-contestUserPermissionSchema.statics.deletePermission = async function (userId: mongoose.Types.ObjectId, contestId: mongoose.Types.ObjectId) {
+contestUserPermissionSchema.statics.deletePermission = async function (
+    userId: mongoose.Types.ObjectId, 
+    contestId: mongoose.Types.ObjectId
+) {
     return await this.findOneAndDelete({ user_id: userId, contest_id: contestId });
 };
 

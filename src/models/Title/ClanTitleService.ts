@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Title, ClanTitle, IClanTitle } from "./TitleModel";
+import { Title, ClanTitle, IClanTitle, ITitle } from "./TitleModel";
 import TitleCacheService from "./TitleCacheService";
 import { titleLibrary } from "./index";
 
@@ -17,6 +17,21 @@ export interface ClanTitleQueryOptions {
     sortOrder?: "asc" | "desc";
     page?: number;
     limit?: number;
+}
+
+// 稀有度类型
+export type RarityType = "common" | "rare" | "epic" | "legendary";
+
+// 头衔统计信息接口
+export interface ClanTitleStatistics {
+    total: number;
+    active: number;
+    expired: number;
+    revoked: number;
+    byRarity: Record<RarityType, number>;
+    byType: Record<string, number>;
+    timeLimited: number;
+    permanent: number;
 }
 
 /**
@@ -257,8 +272,6 @@ export default class ClanTitleService {
      * @param clanId 战队ID
      */
     static async checkAndUpdateExpiredClanTitles(clanId: mongoose.Types.ObjectId): Promise<number> {
-        const now = new Date();
-
         // 获取所有活跃的战队头衔
         const clanTitles = await ClanTitle.find({
             clanId,
@@ -289,11 +302,11 @@ export default class ClanTitleService {
      * 获取战队头衔统计信息
      * @param clanId 战队ID
      */
-    static async getClanTitleStatistics(clanId: mongoose.Types.ObjectId): Promise<any> {
-        const clanTitles = await ClanTitle.find({ clanId }).populate("titleId");
+    static async getClanTitleStatistics(clanId: mongoose.Types.ObjectId): Promise<ClanTitleStatistics> {
+        const clanTitles = await ClanTitle.find({ clanId }).populate<{ titleId: ITitle }>("titleId");
 
         // 初始化统计数据
-        const stats = {
+        const stats: ClanTitleStatistics = {
             total: clanTitles.length,
             active: 0,
             expired: 0,
@@ -304,20 +317,22 @@ export default class ClanTitleService {
                 epic: 0,
                 legendary: 0
             },
-            byType: new Map<string, number>(),
+            byType: {},
             timeLimited: 0,
             permanent: 0
         };
+
+        const typeMap = new Map<string, number>();
 
         for (const clanTitle of clanTitles) {
             // 状态统计
             stats[clanTitle.status]++;
 
             // 稀有度和类型统计
-            const title = clanTitle.titleId as any;
+            const title = clanTitle.titleId;
             if (title) {
                 stats.byRarity[title.rarity]++;
-                stats.byType.set(title.type, (stats.byType.get(title.type) || 0) + 1);
+                typeMap.set(title.type, (typeMap.get(title.type) || 0) + 1);
 
                 // 时限统计
                 if (title.isTimeLimited) {
@@ -329,7 +344,7 @@ export default class ClanTitleService {
         }
 
         // 将Map转换为对象
-        stats.byType = Object.fromEntries(stats.byType) as any;
+        stats.byType = Object.fromEntries(typeMap);
 
         return stats;
     }

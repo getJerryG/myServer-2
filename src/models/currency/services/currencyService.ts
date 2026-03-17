@@ -109,51 +109,57 @@ export default class CurrencyService {
      * 初始化默认货币类型
      * @returns 创建的货币类型列表
      */
+    /**
+     * 获取默认货币类型列表
+     */
+    private static getDefaultCurrencyTypes(): CurrencyTypeCreateType[] {
+        return [
+            {
+                id: CurrencyTypeId.PLATFORM_COIN,
+                name: "平台币",
+                symbol: "PC",
+                decimal: 0,
+                description: "平台通用货币",
+                status: CurrencyStatus.ENABLED
+            },
+            {
+                id: CurrencyTypeId.TEAM_COIN,
+                name: "团队币",
+                symbol: "TC",
+                decimal: 0,
+                description: "团队活动货币",
+                status: CurrencyStatus.ENABLED
+            },
+            {
+                id: CurrencyTypeId.MATCH_COIN,
+                name: "比赛币",
+                symbol: "MC",
+                decimal: 0,
+                description: "比赛专用货币",
+                status: CurrencyStatus.ENABLED
+            },
+            {
+                id: CurrencyTypeId.BET_COIN,
+                name: "投注币",
+                symbol: "BC",
+                decimal: 0,
+                description: "投注专用货币",
+                status: CurrencyStatus.ENABLED
+            },
+            {
+                id: CurrencyTypeId.POINT,
+                name: "积分",
+                symbol: "P",
+                decimal: 0,
+                description: "用户积分",
+                status: CurrencyStatus.ENABLED
+            }
+        ];
+    }
+
     static async initDefaultCurrencyTypes(): Promise<ICurrencyType[]> {
         try {
-            const defaultCurrencies = [
-                {
-                    id: CurrencyTypeId.PLATFORM_COIN,
-                    name: "平台币",
-                    symbol: "PC",
-                    decimal: 0,
-                    description: "平台通用货币",
-                    status: CurrencyStatus.ENABLED
-                },
-                {
-                    id: CurrencyTypeId.TEAM_COIN,
-                    name: "团队币",
-                    symbol: "TC",
-                    decimal: 0,
-                    description: "团队活动货币",
-                    status: CurrencyStatus.ENABLED
-                },
-                {
-                    id: CurrencyTypeId.MATCH_COIN,
-                    name: "比赛币",
-                    symbol: "MC",
-                    decimal: 0,
-                    description: "比赛专用货币",
-                    status: CurrencyStatus.ENABLED
-                },
-                {
-                    id: CurrencyTypeId.BET_COIN,
-                    name: "投注币",
-                    symbol: "BC",
-                    decimal: 0,
-                    description: "投注专用货币",
-                    status: CurrencyStatus.ENABLED
-                },
-                {
-                    id: CurrencyTypeId.POINT,
-                    name: "积分",
-                    symbol: "P",
-                    decimal: 0,
-                    description: "用户积分",
-                    status: CurrencyStatus.ENABLED
-                }
-            ];
-
+            const defaultCurrencies = this.getDefaultCurrencyTypes();
             const createdCurrencies: ICurrencyType[] = [];
 
             for (const currencyData of defaultCurrencies) {

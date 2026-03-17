@@ -5,11 +5,9 @@ import authMiddleware from "@/middlewares/auth";
 import { Admin } from "@/middlewares/role";
 
 // 扩展 Express Request 接口，添加 user 属性
-declare global {
-    namespace Express {
-        interface Request {
-            user?: Record<string, unknown>;
-        }
+declare module "express-serve-static-core" {
+    interface Request {
+        user?: Record<string, unknown>;
     }
 }
 

@@ -1,32 +1,16 @@
 import { Request, Response, NextFunction } from "express";
 import { Socket } from "socket.io";
 import { ExtendedError } from "socket.io/dist/namespace";
-import { verifyToken } from "@/utils/jwt";
-import { UserRole, RoomOperation, RoomPermissions } from "@/types/room";
+import { verifyToken, IJwtPayloadExtended } from "@/utils/jwt";
 import { PermissionError } from "@/utils/errors";
-import { IJwtPayload, IAdminJwtPayload } from "~/User";
+import PermissionCacheService from "@/models/permission/services/PermissionCacheService";
 
-/**
- * 从请求头中提取token
- * @param authorization 请求头中的Authorization字段
- * @returns token字符串
- */
-const extractTokenFromHeader = (authorization?: string): string | undefined => {
-    if (!authorization) return undefined;
-    const [type, token] = authorization.split(" ");
-    return type === "Bearer" ? token : undefined;
-};
-
-/**
- * 包含用户信息的请求接口
- */
-
-type IUser = IJwtPayload | IAdminJwtPayload;
+type IUser = IJwtPayloadExtended | IAdminJwtPayload;
 
 interface IAuth {
     user: IUser;
 }
-// 拓展Socket.io接口，包含用户信息
+
 type SocketWithAuth = Socket & IAuth;
 
 type RequestWithAuth = Request & IAuth;
@@ -37,7 +21,7 @@ type RequestWithAuth = Request & IAuth;
  * @description 验证用户token
  * @returns 认证中间件
  */
-export function authMiddleware(req: RequestWithAuth, res: Response, next: NextFunction) {
+export async function authMiddleware(req: RequestWithAuth, res: Response, next: NextFunction) {
     try {
         const token = extractTokenFromHeader(req.headers.authorization);
         if (!token) {
@@ -49,7 +33,21 @@ export function authMiddleware(req: RequestWithAuth, res: Response, next: NextFu
             return res.status(401).json({ errCode: 4011003, message: "token无效" });
         }
 
-        req.user = decoded as IUser;
+        const {userId} = decoded;
+        const userPermissions = await PermissionCacheService.getUserPermissions(userId);
+
+        if (!userPermissions) {
+            const permissions = await UserRoleService.getUserPermissions(userId);
+            const roles = await UserRoleService.getUserRoleCodes(userId);
+            await PermissionCacheService.setUserPermissions(userId, permissions, roles);
+        }
+
+        req.user = {
+            ...decoded,
+            permissions: userPermissions?.permissions || [],
+            roles: userPermissions?.roles || []
+        };
+
         next();
     } catch {
         return res.status(401).json({ errCode: 4011002, message: "token过期" });

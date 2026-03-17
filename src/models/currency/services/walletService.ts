@@ -231,14 +231,22 @@ export default class WalletService {
      * @param referenceId 参考ID
      * @returns 更新后的钱包和交易记录
      */
+    /**
+     * 增加余额的参数接口
+     */
+    interface BalanceChangeParams {
+        userId: number;
+        currencyType: string;
+        amount: number;
+        transactionType: TransactionType;
+        description?: string;
+        referenceId?: string;
+    }
+
     static async increaseBalance(
-        userId: number,
-        currencyType: string,
-        amount: number,
-        transactionType: TransactionType,
-        description = "",
-        referenceId = ""
+        params: BalanceChangeParams
     ): Promise<{ wallet: IWallet; transaction: ITransaction }> {
+        const { userId, currencyType, amount, transactionType, description = "", referenceId = "" } = params;
         const session = await mongoose.startSession();
         session.startTransaction();
         
@@ -294,22 +302,13 @@ export default class WalletService {
 
     /**
      * 减少余额
-     * @param userId 用户ID
-     * @param currencyType 货币类型
-     * @param amount 减少金额
-     * @param transactionType 交易类型
-     * @param description 描述
-     * @param referenceId 参考ID
+     * @param params 减少余额参数
      * @returns 更新后的钱包和交易记录
      */
     static async decreaseBalance(
-        userId: number,
-        currencyType: string,
-        amount: number,
-        transactionType: TransactionType,
-        description = "",
-        referenceId = ""
+        params: BalanceChangeParams
     ): Promise<{ wallet: IWallet; transaction: ITransaction }> {
+        const { userId, currencyType, amount, transactionType, description = "", referenceId = "" } = params;
         const session = await mongoose.startSession();
         session.startTransaction();
         

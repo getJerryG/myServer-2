@@ -4,14 +4,12 @@ import { ContestRankingService } from "@/models/contest";
 import authMiddleware from "@/middlewares/auth";
 import { contestAdminPermission } from "../../middlewares/contestAdmin";
 
-declare global {
-    namespace Express {
-        interface Request {
-            user?: {
-                userId: string | number;
-                username?: string;
-            };
-        }
+declare module "express-serve-static-core" {
+    interface Request {
+        user?: {
+            userId: string | number;
+            username?: string;
+        };
     }
 }
 

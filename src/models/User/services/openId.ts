@@ -17,7 +17,9 @@ async function getWxSession(code: string) {
         throw new Error("缺少微信小程序配置信息");
     }
     
-    const url = `https://api.weixin.qq.com/sns/jscode2session?appid=${appid}&secret=${secret}&js_code=${code}&grant_type=authorization_code`;
+    const url = "https://api.weixin.qq.com/sns/jscode2session" +
+        "?appid=" + appid + "&secret=" + secret +
+        "&js_code=" + code + "&grant_type=authorization_code;";
     
     const response = await axios.get(url);
     

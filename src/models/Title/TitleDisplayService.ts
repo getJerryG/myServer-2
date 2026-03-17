@@ -50,6 +50,49 @@ export interface TitleDisplayItem {
     displayInfo?: Record<string, unknown>;
 }
 
+// 头衔统计信息接口
+export interface TitleStatistics {
+    total: number;
+    byStatus: Record<string, number>;
+    byType: Record<string, number>;
+    byRarity: Record<string, number>;
+    byTimeLimit: {
+        timeLimited: number;
+        permanent: number;
+    };
+}
+
+// 成就进度接口
+export interface AchievementProgress {
+    totalAvailable: number;
+    totalObtained: number;
+    progressPercentage: number;
+    recentObtained: unknown[]; // 替换any为unknown，更安全的类型
+    nextAvailable: unknown[]; // 替换any为unknown，更安全的类型
+}
+
+// 徽章信息接口
+export interface BadgeInfo {
+    id: string;
+    title: string;
+    image?: string;
+    rarity: string;
+    status: string;
+    size: {
+        width: number;
+        height: number;
+        fontSize: number;
+    };
+    cssClass: string;
+    tooltip: {
+        title: string;
+        description: string;
+        rarity: string;
+        type: string;
+        expiredAt?: Date;
+    };
+}
+
 export default class TitleDisplayService {
     private rarityOrder: Record<string, number> = {
         common: 0,
@@ -120,41 +163,80 @@ export default class TitleDisplayService {
     }
 
     /**
+     * 创建排序比较函数
+     */
+    private createSortComparator(sortBy: TitleSortOption): (a: TitleBase, b: TitleBase) => number {
+        const comparators: Record<TitleSortOption, (a: TitleBase, b: TitleBase) => number> = {
+            createdAt_asc: (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+            createdAt_desc: (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+            expiredAt_asc: (a, b) => {
+                if (!a.expiredAt) return -1;
+                if (!b.expiredAt) return 1;
+                return a.expiredAt.getTime() - b.expiredAt.getTime();
+            },
+            expiredAt_desc: (a, b) => {
+                if (!a.expiredAt) return 1;
+                if (!b.expiredAt) return -1;
+                return b.expiredAt.getTime() - a.expiredAt.getTime();
+            },
+            rarity_asc: (a, b) => this.rarityOrder[a.rarity] - this.rarityOrder[b.rarity],
+            rarity_desc: (a, b) => this.rarityOrder[b.rarity] - this.rarityOrder[a.rarity],
+            title_asc: (a, b) => a.title.localeCompare(b.title, "zh-CN"),
+            title_desc: (a, b) => b.title.localeCompare(a.title, "zh-CN"),
+            type_asc: (a, b) => a.type.localeCompare(b.type, "zh-CN"),
+            type_desc: (a, b) => b.type.localeCompare(a.type, "zh-CN")
+        };
+        return comparators[sortBy] || (() => 0);
+    }
+
+    /**
      * 对头衔进行排序
      * @param titles 头衔列表
      * @param sortBy 排序方式
      */
     private sortTitles(titles: TitleBase[], sortBy: TitleSortOption): TitleBase[] {
-        return [...titles].sort((a, b) => {
-            switch (sortBy) {
-            case "createdAt_asc":
-                return a.createdAt.getTime() - b.createdAt.getTime();
-            case "createdAt_desc":
-                return b.createdAt.getTime() - a.createdAt.getTime();
-            case "expiredAt_asc":
-                if (!a.expiredAt) return -1;
-                if (!b.expiredAt) return 1;
-                return a.expiredAt.getTime() - b.expiredAt.getTime();
-            case "expiredAt_desc":
-                if (!a.expiredAt) return 1;
-                if (!b.expiredAt) return -1;
-                return b.expiredAt.getTime() - a.expiredAt.getTime();
-            case "rarity_asc":
-                return this.rarityOrder[a.rarity] - this.rarityOrder[b.rarity];
-            case "rarity_desc":
-                return this.rarityOrder[b.rarity] - this.rarityOrder[a.rarity];
-            case "title_asc":
-                return a.title.localeCompare(b.title, "zh-CN");
-            case "title_desc":
-                return b.title.localeCompare(a.title, "zh-CN");
-            case "type_asc":
-                return a.type.localeCompare(b.type, "zh-CN");
-            case "type_desc":
-                return b.type.localeCompare(a.type, "zh-CN");
-            default:
-                return 0;
-            }
-        });
+        const comparator = this.createSortComparator(sortBy);
+        return [...titles].sort(comparator);
+    }
+
+    /**
+     * 创建过滤函数
+     */
+    private createFilterFunction(filter: TitleFilter): (title: TitleBase) => boolean {
+        const filters: ((title: TitleBase) => boolean)[] = [];
+
+        // 状态过滤
+        if (filter.status && filter.status.length > 0) {
+            filters.push(title => filter.status!.includes(title.status));
+        }
+
+        // 类型过滤
+        if (filter.type && filter.type.length > 0) {
+            filters.push(title => filter.type!.includes(title.type));
+        }
+
+        // 稀有度过滤
+        if (filter.rarity && filter.rarity.length > 0) {
+            filters.push(title => filter.rarity!.includes(title.rarity as "common" | "rare" | "epic" | "legendary"));
+        }
+
+        // 搜索关键词过滤
+        if (filter.searchKeyword) {
+            const keyword = filter.searchKeyword.toLowerCase();
+            filters.push(title => {
+                const titleLower = title.title.toLowerCase();
+                const descLower = title.description.toLowerCase();
+                const typeLower = title.type.toLowerCase();
+                return titleLower.includes(keyword) || descLower.includes(keyword) || typeLower.includes(keyword);
+            });
+        }
+
+        // 时限过滤
+        if (filter.timeLimit !== undefined) {
+            filters.push(title => (!!title.expiredAt) === filter.timeLimit);
+        }
+
+        return title => filters.every(filterFn => filterFn(title));
     }
 
     /**
@@ -163,50 +245,8 @@ export default class TitleDisplayService {
      * @param filter 过滤条件
      */
     private filterTitles(titles: TitleBase[], filter: TitleFilter): TitleBase[] {
-        return titles.filter((title) => {
-            // 状态过滤
-            if (filter.status && filter.status.length > 0) {
-                if (!filter.status.includes(title.status)) {
-                    return false;
-                }
-            }
-
-            // 类型过滤
-            if (filter.type && filter.type.length > 0) {
-                if (!filter.type.includes(title.type)) {
-                    return false;
-                }
-            }
-
-            // 稀有度过滤
-            if (filter.rarity && filter.rarity.length > 0) {
-                if (!filter.rarity.includes(title.rarity as any)) {
-                    return false;
-                }
-            }
-
-            // 搜索关键词过滤
-            if (filter.searchKeyword) {
-                const keyword = filter.searchKeyword.toLowerCase();
-                if (
-                    !title.title.toLowerCase().includes(keyword) &&
-                    !title.description.toLowerCase().includes(keyword) &&
-                    !title.type.toLowerCase().includes(keyword)
-                ) {
-                    return false;
-                }
-            }
-
-            // 时限过滤
-            if (filter.timeLimit !== undefined) {
-                const isTimeLimited = !!title.expiredAt;
-                if (filter.timeLimit !== isTimeLimited) {
-                    return false;
-                }
-            }
-
-            return true;
-        });
+        const filterFn = this.createFilterFunction(filter);
+        return titles.filter(filterFn);
     }
 
     /**
@@ -257,7 +297,7 @@ export default class TitleDisplayService {
     /**
      * 获取头衔统计信息
      */
-    getTitleStatistics(): Record<string, any> {
+    getTitleStatistics(): TitleStatistics {
         const titles = titleLibrary.getAllTitles();
 
         // 状态统计
@@ -279,11 +319,10 @@ export default class TitleDisplayService {
         }, {});
 
         // 时限统计
-        const timeLimitStats = titles.reduce<Record<string, number>>((acc, title) => {
-            const key = title.expiredAt ? "timeLimited" : "permanent";
-            acc[key] = (acc[key] || 0) + 1;
-            return acc;
-        }, {});
+        const timeLimitStats = {
+            timeLimited: titles.filter(title => !!title.expiredAt).length,
+            permanent: titles.filter(title => !title.expiredAt).length
+        };
 
         return {
             total: titles.length,
@@ -302,7 +341,7 @@ export default class TitleDisplayService {
     getAchievementProgress(
         _recipientId: string,
         _recipientType: "user" | "clan"
-    ): Record<string, any> {
+    ): AchievementProgress {
         // TODO: 实现成就进度逻辑
         return {
             totalAvailable: titleLibrary.getSize(),
@@ -321,7 +360,7 @@ export default class TitleDisplayService {
     generateBadgeInfo(
         title: TitleBase,
         size: "small" | "medium" | "large" = "medium"
-    ): Record<string, any> {
+    ): BadgeInfo {
         const sizeConfig = {
             small: { width: 40, height: 40, fontSize: 12 },
             medium: { width: 60, height: 60, fontSize: 14 },

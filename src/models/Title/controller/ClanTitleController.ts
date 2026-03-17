@@ -14,7 +14,15 @@ export default class ClanTitleController {
      * @param clanId 战队ID
      * @param input 输入参数
      */
-    async grantTitleToClan(clanId: string, input: any): Promise<any> {
+    async grantTitleToClan(
+        clanId: string,
+        input: { 
+            titleId: string; 
+            status?: string; 
+            equipped?: boolean; 
+            metadata?: Record<string, unknown> 
+        }
+    ): Promise<Record<string, unknown>> {
         if (!clanId || !input.titleId) {
             throw new Error("clanId and titleId are required");
         }
@@ -40,7 +48,7 @@ export default class ClanTitleController {
      * @param clanId 战队ID
      * @param clanTitleId 战队头衔ID
      */
-    async equipTitle(clanId: string, clanTitleId: string): Promise<any> {
+    async equipTitle(clanId: string, clanTitleId: string): Promise<Record<string, unknown> | null> {
         if (!clanId || !clanTitleId) {
             throw new Error("clanId and clanTitleId are required");
         }
@@ -86,9 +94,9 @@ export default class ClanTitleController {
      */
     async getClanTitles(
         clanId: string,
-        query: any = {}
+        query: Record<string, unknown> = {}
     ): Promise<{
-        titles: any[];
+        titles: Record<string, unknown>[];
         total: number;
         page: number;
         limit: number;
@@ -126,7 +134,7 @@ export default class ClanTitleController {
      * 获取战队已装备的头衔
      * @param clanId 战队ID
      */
-    async getClanEquippedTitle(clanId: string): Promise<any> {
+    async getClanEquippedTitle(clanId: string): Promise<Record<string, unknown> | null> {
         if (!clanId) {
             throw new Error("clanId is required");
         }
@@ -189,7 +197,7 @@ export default class ClanTitleController {
      * 获取战队头衔统计信息
      * @param clanId 战队ID
      */
-    async getClanTitleStatistics(clanId: string): Promise<any> {
+    async getClanTitleStatistics(clanId: string): Promise<Record<string, unknown>> {
         if (!clanId) {
             throw new Error("clanId is required");
         }
@@ -247,8 +255,8 @@ export default class ClanTitleController {
      * 格式化战队头衔响应
      * @param clanTitle 战队头衔对象
      */
-    private formatClanTitleResponse(clanTitle: IClanTitle): any {
-        const response: any = {
+    private formatClanTitleResponse(clanTitle: IClanTitle): Record<string, unknown> {
+        const response: Record<string, unknown> = {
             _id: clanTitle._id,
             clanId: clanTitle.clanId,
             titleId: clanTitle.titleId,
@@ -260,15 +268,24 @@ export default class ClanTitleController {
         };
 
         // 如果titleId是populated的，添加titleInfo
-        if (clanTitle.titleId && typeof clanTitle.titleId !== "string" && clanTitle.titleId.id) {
+        if (clanTitle.titleId && typeof clanTitle.titleId !== "string" && "id" in clanTitle.titleId) {
+            const titleObj = clanTitle.titleId as {
+                id: string;
+                title: string;
+                description: string;
+                type: string;
+                image?: string;
+                rarity: string;
+                category: string;
+            };
             response.titleInfo = {
-                id: (clanTitle.titleId as any).id,
-                title: (clanTitle.titleId as any).title,
-                description: (clanTitle.titleId as any).description,
-                type: (clanTitle.titleId as any).type,
-                image: (clanTitle.titleId as any).image,
-                rarity: (clanTitle.titleId as any).rarity,
-                category: (clanTitle.titleId as any).category
+                id: titleObj.id,
+                title: titleObj.title,
+                description: titleObj.description,
+                type: titleObj.type,
+                image: titleObj.image,
+                rarity: titleObj.rarity,
+                category: titleObj.category
             };
         }
 

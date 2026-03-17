@@ -1,8 +1,6 @@
-const path = require("path");
 const { merge } = require("webpack-merge");
 const baseConfig = require("./webpack.base");
 const webpack = require("webpack");
-const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer");
 const os = require("os");
 const TerserPlugin = require("terser-webpack-plugin"); //
 const CompressionPlugin = require("compression-webpack-plugin"); // gzip
@@ -33,7 +31,7 @@ module.exports = merge(baseConfig, {
                     reuseExistingChunk: true,
                 },
                 roles: {
-                    test: /[\/]src[\/]models[\/]roles[\/]/,
+                    test: /\/src\/models\/roles\//,
                     name: "roles",
                     priority: -15,
                     reuseExistingChunk: true

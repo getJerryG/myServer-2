@@ -54,6 +54,14 @@ export class BetScore {
 }
 
 /**
+ * 房间投注选项接口
+ */
+export interface RoomBetOptions {
+    betCustomization?: boolean | Record<string, unknown>;
+    [key: string]: unknown; // 替换any为unknown，更安全的类型
+}
+
+/**
  * 房间投注管理类
  * 管理房间内所有玩家的投注信息
  */
@@ -62,9 +70,9 @@ export default class RoomBetScore {
     private id: string;
     status: 0 | 1 | 2;
     private isWin: boolean;
-    readonly options?: any;
+    readonly options?: RoomBetOptions;
 
-    constructor(options?: any) {
+    constructor(options?: RoomBetOptions) {
         this._bets = new Map<string, BetScore>();
         this.id = uuid();
         this.status = 0; // 0: 未开始, 1: 进行中, 2: 已结束
@@ -90,7 +98,7 @@ export default class RoomBetScore {
     /**
      * 获取投注自定义配置
      */
-    betCustomization(): any {
+    betCustomization(): boolean | Record<string, unknown> | undefined {
         return this.options?.betCustomization;
     }
 
@@ -178,7 +186,6 @@ export default class RoomBetScore {
      * 处理投注数据
      */
     private __processingData__(): void {
-        let levelSum = 0;
         const pool = ThreadPool.getInstance(6);
         const batchSize = 1000;
         const totalBets = this.bets.length;
@@ -199,7 +206,7 @@ export default class RoomBetScore {
                     const reward = await pool.addTask((data: number[]) => {
                         const proportion = data[0] / data[1];
                         return Math.max(0, Math.floor(data[2] * proportion));
-                    }, [betScore.betScore, this.sumBetScore(), this.levelSum]);
+                    }, [betScore.betScore, this.sumBetScore(), this.betScore || 0]);
 
                     betScore.reward = betScore.betScore + reward;
                     return reward;
@@ -210,8 +217,8 @@ export default class RoomBetScore {
             });
 
             // 等待批次处理完成
-            Promise.all(batchPromises).then((batchRewards) => {
-                levelSum += batchRewards.reduce((sum, reward) => sum + reward, 0);
+            Promise.all(batchPromises).then(() => {
+                // 批次处理完成，不需要累加奖励总和
             });
         }
     }

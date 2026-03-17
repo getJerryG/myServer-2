@@ -21,6 +21,20 @@ export interface PromotionRecord {
     updatedAt: Date;
 }
 
+// 赛程记录接口
+export interface ScheduleItem {
+    date: string;
+    [key: string]: unknown; // 允许其他动态字段
+}
+
+// 团队记录接口
+export interface TeamRecord {
+    startDay: string;
+    endDay: string;
+    data: unknown[]; // 替换any为unknown，更安全的类型
+    schedule: ScheduleItem[];
+}
+
 export default class Team {
     id: number;
     name: string;
@@ -28,10 +42,7 @@ export default class Team {
     members: Map<TeamMember["nickName"], TeamMember>;
     clan: Clan;
     readonly memberOps: PlayerAllocation;
-    records: Record<
-        string,
-        { startDay: string; endDay: string; any: any[]; schedule: any[] }
-    >;
+    records: Record<string, TeamRecord>;
     promotionRecords: PromotionRecord[];
     contestId?: string;
 
@@ -182,7 +193,7 @@ export default class Team {
         return null;
     }
 
-    setRecord(recordKey: string, recordData: any) {
+    setRecord(recordKey: string, recordData: RecordData) {
         this.records[recordKey] = recordData;
         this.cacheRecords();
     }

@@ -35,11 +35,11 @@ router.get("/", (req, res) => {
  */
 router.get("/page", (req, res) => {
     try {
-        const num = Number(req.query.num) || 10;
-        const page = Number(req.query.page) || -1;
+        // 分页参数，暂未使用
+        // const num = Number(req.query.num) || 10;
+        // const page = Number(req.query.page) || -1;
         
-        const gameRecord = new GameRecord([]);
-        // const records = gameRecord.getRecords(num, page);
+        // 暂未实现具体逻辑
         const records = [];
         resSuccess(res, records, "获取记录成功");
     } catch (error) {
@@ -59,8 +59,7 @@ router.get("/time", (req, res) => {
             return resBadRequest(res, "缺少时间参数");
         }
         
-        const gameRecord = new GameRecord([]);
-        // const records = gameRecord.getRecordsByTime(start, end);
+        // 暂未实现具体逻辑
         resSuccess(res, [], "功能暂未实现");
     } catch (error) {
         resError(res, 500, error instanceof Error ? error.message : "获取记录失败");

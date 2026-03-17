@@ -1,4 +1,3 @@
-import type { Metadata } from "~/base-types";
 
 export enum MessageType {
     CHAT = "chat",

@@ -1,6 +1,7 @@
 import cors, { CorsOptions } from "cors";
 import express from "express";
 import bodyParser from "body-parser";
+import rateLimit from "express-rate-limit";
 import usersRoutes from "./routes/userRoutes";
 import recordRoutes from "./routes/RocordRoutes";
 import monitorRoutes from "./routes/monitorRoutes";
@@ -17,9 +18,12 @@ import titleRoutes from "./routes/titleRoutes";
 import contestAdminRoutes from "./routes/contest/contestAdminRoutes";
 
 const corsOptions: CorsOptions = {
-    origin: (_origin: string | undefined, callback: (error: Error | null, allow?: boolean) => void) => {
-        callback(null, true);
-    },
+    origin: [
+        "http://localhost:3000", 
+        "http://localhost:8080", 
+        "http://localhost:5500", 
+        "https://your-production-domain.com"
+    ],
     credentials: true, // 允许携带cookie
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization", "x-request-time"]
@@ -27,7 +31,16 @@ const corsOptions: CorsOptions = {
 
 const app = express();
 
+// 配置请求频率限制
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15分钟
+    max: 100, // 每个IP最多100个请求
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
 app.use(cors(corsOptions)); // 启用CORS
+app.use(limiter); // 应用请求频率限制
 // app.use(maintenance); // 使用维护中间件
 app.use(bodyParser.json()); // 解析JSON请求体
 
@@ -69,7 +82,9 @@ app.use("/show", showImageRoutes);
 // 9. 记录模块
 app.use("/records", recordRoutes);
 
-// 10. 其他模块
+
+
+// 11. 其他模块
 // ...
 
 //导出app

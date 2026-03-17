@@ -28,7 +28,7 @@ export default class User {
      * @param session_key 微信会话密钥
      * @returns 登录结果
      */
-    static async login(userId: number, session_key: string) {
+    static async login(userId: number, _session_key: string) {
 
         const user = await UserService.getSession_key(userId);
 
@@ -63,7 +63,7 @@ export default class User {
      * @param updateInfo 更新信息
      * @returns 更新结果
      */
-    static async updateUserInfo(userId: number, updateInfo: any) {
+    static async updateUserInfo(userId: number, updateInfo: Record<string, unknown>) {
         return await UserService.updateUser(userId, updateInfo);
     }
 }

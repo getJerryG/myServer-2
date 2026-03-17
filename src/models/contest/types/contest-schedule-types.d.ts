@@ -27,7 +27,6 @@ export interface EliminationInfo {
     description: string;          // 描述
 }
 
-import mongoose from "mongoose";
 
 export interface IContestSchedule extends Document {
     contest_id: number;

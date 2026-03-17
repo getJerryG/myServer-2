@@ -44,7 +44,7 @@ export default class LuckyColorBox {
     public count = 0;
     private _data: (number | undefined)[];
     private _length = 9;
-    private _log: any[];
+    private _log: unknown[];
     
     constructor() {
         this._data = Array.from({ length: this._length }, () => undefined);
@@ -99,7 +99,7 @@ export default class LuckyColorBox {
     /**
      * 获取日志
      */
-    get log(): any[] {
+    get log(): unknown[] {
         return this._log;
     }
     

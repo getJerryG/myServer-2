@@ -1,5 +1,5 @@
 // 测试选手当天状态的二进制表示
-import ContestDay, { PlayerDayStatus, PlayerDayDetail } from "../models/contest/data/ContestDay";
+import ContestDay, { PlayerDayStatus } from "../models/contest/data/ContestDay";
 
 /**
  * 测试选手当天状态的二进制表示

@@ -24,11 +24,13 @@ export interface UserBase extends Timestamps {
     exp: number;
     status: UserStatus;
     role: UserRole;
-    loginCount: number;
-    lastLoginTime: Date;
     session_key: string;
     signIn: UserSignIn;
     permission: number;
+    
+    // 新增字段（修复权限系统集成）
+    roleIds: Schema.Types.ObjectId[];
+    permissionsUpdatedAt?: Date;
 }
 
 export type IUser = UserBase & Document;

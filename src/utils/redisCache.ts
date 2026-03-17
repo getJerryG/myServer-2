@@ -1,6 +1,6 @@
 import redis from "../config/redis";
 import { BloomFilter } from "./bloomFilter";
-import { DistributedLock } from "./distributedLock";
+
 
 /**
  * Redis CacheManager
@@ -17,7 +17,7 @@ export default class RedisCacheManager {
     };
     
     private static bloomFilter: BloomFilter = new BloomFilter(redis, "bloom:filter", 1000000, 0.0001);
-    private static distributedLock: DistributedLock = new DistributedLock(redis, "lock:", 2000);
+
     
     /**
      * Get cache metrics
@@ -57,12 +57,7 @@ export default class RedisCacheManager {
         return this.bloomFilter;
     }
     
-    /**
-     * Get distributed lock instance
-     */
-    public static getDistributedLock(): DistributedLock {
-        return this.distributedLock;
-    }
+    
     
     /**
      * Scan keys with pattern
@@ -86,9 +81,8 @@ export default class RedisCacheManager {
      * @param key - Redis key
      * @param value - Value to cache
      * @param ttl - Time to live in seconds
-     * @param enableRandomTTL - Whether to enable random TTL offset
      */
-    public static async set<T>(key: string, value: T, ttl?: number, enableRandomTTL = true): Promise<boolean> {
+    public static async set<T>(key: string, value: T, ttl?: number): Promise<boolean> {
         try {
             const serializedValue = JSON.stringify(value);
             
@@ -112,9 +106,8 @@ export default class RedisCacheManager {
     /**
      * Get cache value
      * @param key - Redis key
-     * @param enableBloomFilter - Whether to use bloom filter
      */
-    public static async get<T>(key: string, enableBloomFilter = true): Promise<T | undefined> {
+    public static async get<T>(key: string): Promise<T | undefined> {
         try {
             this.metrics.getCount++;
             

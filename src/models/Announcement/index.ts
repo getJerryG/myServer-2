@@ -94,7 +94,10 @@ class Announcement {
             type,
             $or: [
                 { startDate: { $lt: startDate }, endDate: { $gt: startDate }},
-                { startDate: { $lt: endDate || new Date(8640000000000000) }, endDate: { $gt: endDate || new Date(8640000000000000) }},
+                {
+                    startDate: { $lt: endDate || new Date(8640000000000000) },
+                    endDate: { $gt: endDate || new Date(8640000000000000) }
+                },
                 { startDate: { $gt: startDate }, endDate: { $lt: endDate || new Date(8640000000000000) }},
                 { startDate: { $lt: startDate }, endDate: { $exists: false }}
             ].filter(Boolean)

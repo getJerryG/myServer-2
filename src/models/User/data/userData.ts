@@ -26,7 +26,7 @@ export default class User {
         try {
             const userController = new UserController(userData);
             return await new UserModel(userController).save();
-        } catch (error) {
+        } catch (_error) {
             throw new Error("创建用户失败");
         }
     }
@@ -108,19 +108,15 @@ export default class User {
      * @param exp 经验值
      */
     async addExp(exp: number): Promise<void> {
-        try {
-            if (!this.data?.userId) {
-                return Promise.reject("用户ID不存在");
-            }
-
-            await this.update({ status: 1 });
-            await UserModel.updateOne(
-                { userId: this.data.userId },
-                { $inc: { exp } }
-            );
-        } catch (error) {
-            throw error;
+        if (!this.data?.userId) {
+            return Promise.reject("用户ID不存在");
         }
+
+        await this.update({ status: 1 });
+        await UserModel.updateOne(
+            { userId: this.data.userId },
+            { $inc: { exp } }
+        );
     }
 
     /**
@@ -255,20 +251,16 @@ export default class User {
      * @returns 用户列表
      */
     static async getAll(): Promise<IUser[]> {
-        try {
-            return await UserModel.find(
-                {},
-                {
-                    password: 0,
-                    session_key: 0,
-                    openId: 0,
-                    permission: 0,
-                    game: 0
-                }
-            );
-        } catch (error) {
-            throw error;
-        }
+        return await UserModel.find(
+            {},
+            {
+                password: 0,
+                session_key: 0,
+                openId: 0,
+                permission: 0,
+                game: 0
+            }
+        );
     }
 
     /**
@@ -289,7 +281,10 @@ export default class User {
      * @param query 查询条件
      * @returns 用户信息
      */
-    static async findOne(query: Record<string, unknown> = {}, projection: Record<string, unknown> = {}): Promise<IUser | null> {
+    static async findOne(
+        query: Record<string, unknown> = {},
+        projection: Record<string, unknown> = {}
+    ): Promise<IUser | null> {
         try {
             return await UserModel.findOne(query, projection).exec();
         } catch (_error) {
@@ -304,7 +299,11 @@ export default class User {
      * @param options 更新选项
      * @returns 更新后的用户信息
      */
-    static async findOneAndUpdate(query: Record<string, unknown>, update: Record<string, unknown>, options: Record<string, unknown> = {}): Promise<IUser | null> {
+    static async findOneAndUpdate(
+        query: Record<string, unknown>,
+        update: Record<string, unknown>,
+        options: Record<string, unknown> = {}
+    ): Promise<IUser | null> {
         try {
             return await UserModel.findOneAndUpdate(query, update, options).exec();
         } catch (error) {
@@ -318,7 +317,7 @@ export default class User {
      * @param query 查询条件
      * @returns 删除结果
      */
-    static async deleteOne(query: any): Promise<{ deletedCount: number }> {
+    static async deleteOne(query: Record<string, unknown>): Promise<{ deletedCount: number }> {
         try {
             return await UserModel.deleteOne(query).exec();
         } catch (error) {

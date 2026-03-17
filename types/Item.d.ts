@@ -18,7 +18,7 @@ export interface BaseItem {
 export interface ItemOptions {
     isBind?: boolean;
     duration?: number;
-    attributes?: Record<string, any>;
+    attributes?: Record<string, unknown>;
 }
 
 /**

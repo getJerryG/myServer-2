@@ -234,7 +234,7 @@ export class CacheConsistencyManager {
          * @param userData 用户数据
          * @returns 是否成功
          */
-        async updateUserInfoCache(userId: number, userData: any): Promise<boolean> {
+        async updateUserInfoCache(userId: number, userData: unknown): Promise<boolean> {
             return CacheConsistencyManager.updateCache(
                 CACHE_KEYS.USER_INFO,
                 { userId },
@@ -281,7 +281,7 @@ export class CacheConsistencyManager {
          * @param titleData 头衔数据
          * @returns 是否成功
          */
-        async updateTitleInfoCache(titleId: string, titleData: any): Promise<boolean> {
+        async updateTitleInfoCache(titleId: string, titleData: unknown): Promise<boolean> {
             return CacheConsistencyManager.updateCache(
                 CACHE_KEYS.TITLE_INFO,
                 { titleId },

@@ -75,7 +75,7 @@ memberSchema.index({ exp: 1 }); // 经验值索引
 /**
  * 成员保存前的中间件
  */
-function memberPre(next: Function) {
+function memberPre(next: () => void) {
     const now = new Date();
     
     // 检查成员状态

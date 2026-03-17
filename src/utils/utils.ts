@@ -54,13 +54,13 @@ export function deepClone<T>(obj: T): T {
     }
     
     if (typeof obj === "object") {
-        const clonedObj: Record<string, any> = {};
+        const clonedObj = {} as T;
         for (const key in obj) {
-            if (obj.hasOwnProperty(key)) {
-                clonedObj[key] = deepClone(obj[key]);
+            if (Object.hasOwn(obj, key)) {
+                clonedObj[key as keyof T] = deepClone(obj[key]);
             }
         }
-        return clonedObj as T;
+        return clonedObj;
     }
     
     return obj;
@@ -95,7 +95,7 @@ export function formatDate(date: Date, format: string = "YYYY-MM-DD HH:mm:ss"): 
  * @param delay 延迟时间
  * @returns 防抖后的函数
  */
-export function debounce<T extends (...args: any[]) => any>(func: T, delay: number): (...args: Parameters<T>) => void {
+export function debounce<T extends (...args: unknown[]) => unknown>(func: T, delay: number): (...args: Parameters<T>) => void {
     let timeoutId: NodeJS.Timeout;
     
     return (...args: Parameters<T>) => {
@@ -110,7 +110,7 @@ export function debounce<T extends (...args: any[]) => any>(func: T, delay: numb
  * @param limit 时间限制
  * @returns 节流后的函数
  */
-export function throttle<T extends (...args: any[]) => any>(func: T, limit: number): (...args: Parameters<T>) => void {
+export function throttle<T extends (...args: unknown[]) => unknown>(func: T, limit: number): (...args: Parameters<T>) => void {
     let inThrottle: boolean;
     
     return (...args: Parameters<T>) => {

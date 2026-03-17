@@ -33,7 +33,6 @@ router.post("/uploadAvatar", authMiddleware, upload.single("file"), async (req: 
         await fs.promises.mkdir(targetFolder, { recursive: true });
 
         // 生成新的文件名
-        const fileExtension = req.file.originalname.split(".").pop() || "jpg";
         const fileName = `${uuid().slice(0, 6)}-${userId}`;
         const fullTargetPath = path.join(targetFolder, `${fileName}.webp`);
 

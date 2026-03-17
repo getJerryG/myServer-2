@@ -75,7 +75,11 @@ export default class ContestRankingService {
      * @param _operator 操作人
      * @returns 排名列表
      */
-    static async manualRank(scheduleId: string, rankingData: Partial<IContestRanking>[], _operator: string): Promise<IContestRanking[]> {
+    static async manualRank(
+        scheduleId: string, 
+        rankingData: Partial<IContestRanking>[], 
+        _operator: string
+    ): Promise<IContestRanking[]> {
         try {
             const schedule = await ContestScheduleService.getSchedule(scheduleId);
             if (!schedule) {
@@ -137,6 +141,51 @@ export default class ContestRankingService {
      * @param scheduleId 赛程ID
      * @returns 处理结果
      */
+    /**
+     * 更新单个排名的晋级状态
+     */
+    private static async updateRankingPromotionStatus(
+        rank: IContestRanking,
+        promotedCount: number,
+        contestId: string,
+        roundOrder: number
+    ): Promise<IContestRanking> {
+        let promotionStatus: PromotionStatus = "pending";
+        
+        // 根据排名确定晋级状态
+        if (rank.rank <= promotedCount) {
+            promotionStatus = "promoted";
+        } else {
+            promotionStatus = "eliminated";
+        }
+        
+        let nextScheduleId = null;
+        
+        // 获取下一轮赛程
+        if (promotionStatus === "promoted") {
+            const nextSchedule = await ContestScheduleService.getNextSchedule(
+                contestId,
+                roundOrder
+            );
+            
+            if (nextSchedule) {
+                nextScheduleId = nextSchedule._id;
+            }
+        }
+        
+        // 更新排名
+        return await ContestRankingModel.findByIdAndUpdate(
+            rank._id,
+            {
+                $set: {
+                    promotionStatus,
+                    nextScheduleId
+                }
+            },
+            { new: true }
+        ) as IContestRanking;
+    }
+
     static async processPromotion(scheduleId: string): Promise<Record<string, unknown>> {
         try {
             const schedule = await ContestScheduleService.getSchedule(scheduleId);
@@ -144,47 +193,19 @@ export default class ContestRankingService {
                 throw new Error("赛程不存在");
             }
             
-            let rankings = await ContestRankingModel.getRankingsByScheduleId(schedule_id);
+            let rankings = await ContestRankingModel.getRankingsByScheduleId(schedule._id);
             
             // 计算晋级队伍数量
             const promotedCount = await ContestScheduleService.calculatePromotedTeams(scheduleId);
             
             // 更新排名状态
             rankings = await Promise.all(rankings.map(async (rank) => {
-                let promotionStatus: PromotionStatus = "pending";
-                
-                // 根据排名确定晋级状态
-                if (rank.rank <= promotedCount) {
-                    promotionStatus = "promoted";
-                } else {
-                    promotionStatus = "eliminated";
-                }
-                
-                let nextScheduleId = null;
-                
-                // 获取下一轮赛程
-                if (promotionStatus === "promoted") {
-                    const nextSchedule = await ContestScheduleService.getNextSchedule(
-                        schedule.contest_id,
-                        schedule.roundOrder
-                    );
-                    
-                    if (nextSchedule) {
-                        nextScheduleId = nextSchedule._id;
-                    }
-                }
-                
-                // 更新排名
-                return await ContestRankingModel.findByIdAndUpdate(
-                    rank._id,
-                    {
-                        $set: {
-                            promotionStatus,
-                            nextScheduleId
-                        }
-                    },
-                    { new: true }
-                ) as IContestRanking;
+                return this.updateRankingPromotionStatus(
+                    rank, 
+                    promotedCount, 
+                    schedule.contest_id, 
+                    schedule.roundOrder
+                );
             }));
             
             // 更新赛程晋级队伍数量
@@ -404,15 +425,82 @@ export default class ContestRankingService {
      * @param operator 操作人
      * @returns 记录结果
      */
-    static async recordPlayerMatchResult(
+    /**
+     * 记录选手比赛结果的参数接口
+     */
+    interface RecordPlayerMatchResultParams {
+        contestId: string;
+        teamName: string;
+        date: string;
+        round: number;
+        players: IPlayerMatchResult[];
+        operator: string;
+    }
+
+    /**
+     * 准备选手结果数据
+     */
+    private static preparePlayerResults(
         contestId: string,
+        scheduleId: string,
         teamName: string,
-        date: string,
-        round: number,
-        players: IPlayerMatchResult[],
-        operator: string
+        matchId: string,
+        players: IPlayerMatchResult[]
+    ): IPlayerResult[] {
+        return players.map((player) => {
+            return new ContestPlayerResultModel({
+                contestId,
+                scheduleId,
+                registrationId: null,
+                matchId,
+                teamName,
+                userId: player.userId,
+                nickname: player.nickname,
+                score: player.score || 0,
+                role: player.role || "",
+                faction: player.faction || "",
+                isMvp: player.isMvp || false,
+                isSvp: player.isSvp || false,
+                isWin: player.isWin || false,
+                honor: player.honor || ""
+            });
+        });
+    }
+
+    /**
+     * 更新或创建队伍排名
+     */
+    private static async updateOrCreateTeamRanking(
+        contestId: string,
+        scheduleId: string,
+        teamName: string,
+        teamScore: number
+    ): Promise<void> {
+        let ranking = await ContestRankingModel.findOne({ contestId, scheduleId, teamName });
+        if (!ranking) {
+            ranking = new ContestRankingModel({
+                contestId,
+                scheduleId,
+                teamId: `team_${Date.now()}`,
+                teamName,
+                score: teamScore,
+                rank: 0,
+                promotionStatus: "pending" as PromotionStatus,
+                nextScheduleId: null,
+                rankingType: "manual" as RankingType
+            });
+        } else {
+            ranking.score = teamScore;
+        }
+        await ranking.save();
+    }
+
+    static async recordPlayerMatchResult(
+        params: RecordPlayerMatchResultParams
     ): Promise<Record<string, unknown>> {
         try {
+            const { contestId, teamName, date, round, players, operator } = params;
+            
             const schedule = await ContestScheduleService.getScheduleByRoundOrder(contestId, round);
             if (!schedule) {
                 throw new Error(`第${round}轮赛程不存在`);
@@ -425,55 +513,32 @@ export default class ContestRankingService {
 
             const matchId = `${contestId}_${schedule._id}_${teamName}_${date}`;
 
+            // 删除旧的比赛结果
             await ContestPlayerResultModel.deletePlayerResultsByMatch(
                 contestId,
                 schedule._id,
                 teamName
             );
 
-            const playerResults: IPlayerResult[] = players.map((player) => {
-                return new ContestPlayerResultModel({
-                    contestId,
-                    scheduleId: schedule._id,
-                    registrationId: null,
-                    matchId,
-                    teamName,
-                    userId: player.userId,
-                    nickname: player.nickname,
-                    score: player.score || 0,
-                    role: player.role || "",
-                    faction: player.faction || "",
-                    isMvp: player.isMvp || false,
-                    isSvp: player.isSvp || false,
-                    isWin: player.isWin || false,
-                    honor: player.honor || ""
-                });
-            });
-
+            // 准备并插入选手结果
+            const playerResults = this.preparePlayerResults(
+                contestId,
+                schedule._id,
+                teamName,
+                matchId,
+                players
+            );
             await ContestPlayerResultModel.insertMany(playerResults);
 
+            // 计算队伍统计数据
             const teamScore = players.reduce((sum, player) => sum + (player.score || 0), 0);
             const hasMvp = players.some((player) => player.isMvp);
             const hasWin = players.some((player) => player.isWin);
 
-            let ranking = await ContestRankingModel.findOne({ contestId, scheduleId: schedule._id, teamName });
-            if (!ranking) {
-                ranking = new ContestRankingModel({
-                    contestId,
-                    scheduleId: schedule._id,
-                    teamId: `team_${Date.now()}`,
-                    teamName,
-                    score: teamScore,
-                    rank: 0,
-                    promotionStatus: "pending" as PromotionStatus,
-                    nextScheduleId: null,
-                    rankingType: "manual" as RankingType
-                });
-            } else {
-                ranking.score = teamScore;
-            }
-            await ranking.save();
+            // 更新或创建队伍排名
+            await this.updateOrCreateTeamRanking(contestId, schedule._id, teamName, teamScore);
 
+            // 自动排名
             await this.autoRank(schedule._id as string);
 
             return {

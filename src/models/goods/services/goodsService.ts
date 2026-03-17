@@ -14,6 +14,14 @@ import { TransactionType } from "../../currency/types/currency";
 import WalletService from "../../currency/services/walletService";
 import mongoose from "mongoose";
 
+// 商品查询参数接口
+export interface GoodsQuery {
+    type?: string;
+    status?: string;
+    name?: string;
+    [key: string]: unknown;
+}
+
 export default class GoodsService {
     /**
      * 获取商品列表
@@ -23,12 +31,12 @@ export default class GoodsService {
      * @returns 商品列表和分页信息
      */
     static async getGoodsList(
-        query: any = {},
+        query: GoodsQuery = {},
         page = 1,
         pageSize = 10
     ): Promise<{ goods: Goods[]; total: number; totalPages: number }> {
         try {
-            const filter: any = {};
+            const filter: Record<string, unknown> = {};
             
             if (query.type) {
                 filter.type = query.type;

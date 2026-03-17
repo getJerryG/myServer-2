@@ -1,5 +1,11 @@
 import ContestScheduleModel from "../models/ContestScheduleModel";
-import { IContestSchedule, ContestScheduleCreateType, EliminationInfo, MatchInfo, DailySchedule } from "../types/contest-schedule-types";
+import {
+    IContestSchedule,
+    ContestScheduleCreateType,
+    EliminationInfo,
+    MatchInfo,
+    DailySchedule
+} from "../types/contest-schedule-types";
 import { ContestService } from "../index";
 import ContestAutoStatusUpdateService from "./ContestAutoStatusUpdateService";
 import werewolfEditions from "models/Game/config/werewolfKillEdition";
@@ -44,6 +50,69 @@ export default class ContestScheduleService {
      * @param options 可选配置
      * @returns 创建的赛程对象
      */
+    /**
+     * 验证赛程基本数据
+     */
+    private static validateScheduleBasicData(scheduleData: ContestScheduleCreateType): void {
+        const { startDate, endDate, roundName } = scheduleData;
+        if (!startDate || !endDate) {
+            throw new Error("赛程必须包含开始时间和结束时间");
+        }
+
+        if (startDate > endDate) {
+            throw new Error("赛程开始时间不能晚于结束时间");
+        }
+
+        if (!roundName) {
+            throw new Error("赛程必须包含轮次名称");
+        }
+    }
+
+    /**
+     * 检查轮次名称唯一性
+     */
+    private static async checkRoundNameUniqueness(contestId: string | number, roundName: string): Promise<void> {
+        const existingSchedule = await ContestScheduleModel.findOne({ 
+            contest_id: contestId, 
+            roundName 
+        });
+        if (existingSchedule) {
+            throw new Error(`赛事中已存在名为"${roundName}"的赛程`);
+        }
+    }
+
+    /**
+     * 处理赛事时间更新
+     */
+    private static async handleContestTimeUpdate(
+        contestId: string | number,
+        contest: IContest,
+        startDate: Date,
+        endDate: Date,
+        options: { autoUpdateContestTime?: boolean }
+    ): Promise<void> {
+        const updateContestData: Record<string, Date> = {};
+        if (startDate < contest.startDay) {
+            if (options.autoUpdateContestTime) {
+                updateContestData.startDay = startDate;
+            } else {
+                throw new Error("赛程开始时间不能早于赛事开始时间");
+            }
+        }
+
+        if (endDate > contest.endDay) {
+            if (options.autoUpdateContestTime) {
+                updateContestData.endDay = endDate;
+            } else {
+                throw new Error("赛程结束时间不能晚于赛事结束时间");
+            }
+        }
+
+        if (Object.keys(updateContestData).length > 0) {
+            await ContestService.updateContest(Number(contestId), updateContestData);
+        }
+    }
+
     static async createSchedule(
         contestId: string | number, 
         scheduleData: ContestScheduleCreateType,
@@ -56,58 +125,27 @@ export default class ContestScheduleService {
                 throw new Error(`赛事不存在: ${contestId}`);
             }
 
-            // 2. 验证赛程时间
-            const { startDate, endDate, roundName, schedule } = scheduleData;
-            if (!startDate || !endDate) {
-                throw new Error("赛程必须包含开始时间和结束时间");
-            }
+            // 2. 验证赛程基本数据
+            this.validateScheduleBasicData(scheduleData);
 
-            if (startDate > endDate) {
-                throw new Error("赛程开始时间不能晚于结束时间");
-            }
-
-            // 3. 验证roundName唯一性
-            if (!roundName) {
-                throw new Error("赛程必须包含轮次名称");
-            }
-
-            const existingSchedule = await ContestScheduleModel.findOne({ 
-                contest_id: contestId, 
-                roundName 
-            });
-            if (existingSchedule) {
-                throw new Error(`赛事中已存在名为"${roundName}"的赛程`);
-            }
+            // 3. 验证轮次名称唯一性
+            await this.checkRoundNameUniqueness(contestId, scheduleData.roundName);
 
             // 4. 处理赛事时间更新
-            const updateContestData: Record<string, Date> = {};
-            if (startDate < contest.startDay) {
-                if (options.autoUpdateContestTime) {
-                    updateContestData.startDay = startDate;
-                } else {
-                    throw new Error("赛程开始时间不能早于赛事开始时间");
-                }
-            }
-
-            if (endDate > contest.endDay) {
-                if (options.autoUpdateContestTime) {
-                    updateContestData.endDay = endDate;
-                } else {
-                    throw new Error("赛程结束时间不能晚于赛事结束时间");
-                }
-            }
+            await this.handleContestTimeUpdate(
+                contestId,
+                contest,
+                scheduleData.startDate,
+                scheduleData.endDate,
+                options
+            );
 
             // 5. 验证赛程中的比赛版型
-            if (schedule && schedule.length > 0) {
-                this.validateScheduleMatches(schedule);
+            if (scheduleData.schedule && scheduleData.schedule.length > 0) {
+                this.validateScheduleMatches(scheduleData.schedule);
             }
 
-            // 6. 如果需要，更新赛事时间
-            if (Object.keys(updateContestData).length > 0) {
-                await ContestService.updateContest(Number(contestId), updateContestData);
-            }
-
-            // 7. 创建赛程
+            // 6. 创建赛程
             const newSchedule = new ContestScheduleModel({
                 ...scheduleData,
                 contest_id: contestId,
@@ -460,7 +498,7 @@ export default class ContestScheduleService {
      * @param contest 赛事对象
      * @returns 当天的赛程安排
      */
-    static async getScheduleByContestDay(contest: any): Promise<any> {
+    static async getScheduleByContestDay(contest: { contestId?: number | string; contest_id?: number | string }): Promise<DailySchedule | null> {
         try {
             if (!contest) {
                 throw new Error("赛事数据不存在");

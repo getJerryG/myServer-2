@@ -1,5 +1,7 @@
 import { Server as SocketServer } from "socket.io";
 import EventEmitter from "events";
+import { Server as HttpServer } from "http";
+import type { IUser } from "types/User.d";
 
 /**
  * Socket.IO服务器类
@@ -7,14 +9,14 @@ import EventEmitter from "events";
  */
 class Server extends EventEmitter {
     #io: SocketServer;
-    #player: Set<any> = new Set(); // 存储玩家集合
-    #server: any;
+    #player: Set<IUser> = new Set(); // 存储玩家集合
+    #server: HttpServer;
 
     /**
      * 构造函数
      * @param server HTTP服务器实例
      */
-    constructor(server: any) {
+    constructor(server: HttpServer) {
         super();
         this.#server = server;
         this.#init();
@@ -32,7 +34,7 @@ class Server extends EventEmitter {
      * 设置玩家集合
      * @param player 玩家集合
      */
-    set player(player: Set<any>) {
+    set player(player: Set<IUser>) {
         this.#player = player;
     }
 

@@ -9,7 +9,7 @@ export interface UserTitleOptions {
     titleId: mongoose.Types.ObjectId;
     status?: "active" | "equipped" | "expired" | "revoked";
     equipped?: boolean;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
 }
 
 /**
@@ -30,43 +30,52 @@ export interface UserTitleQueryOptions {
  */
 export default class UserTitleService {
     /**
-     * 授予头衔给用户
-     * @param userId 用户ID
-     * @param options 头衔选项
-     * @returns 授予的用户头衔
+     * 检查头衔是否存在
      */
-    static async grantTitleToUser(
-        userId: mongoose.Types.ObjectId,
-        options: UserTitleOptions
-    ): Promise<IUserTitle> {
-        const title = await Title.findById(options.titleId);
+    private static async checkTitleExists(titleId: mongoose.Types.ObjectId) {
+        const title = await Title.findById(titleId);
         if (!title) {
             throw new Error("Title not found");
         }
+        return title;
+    }
 
-        // 检查用户是否已拥有该头衔
-        const existing = await UserTitle.findOne({
+    /**
+     * 检查用户是否已拥有该头衔
+     */
+    private static async getExistingUserTitle(userId: mongoose.Types.ObjectId, titleId: mongoose.Types.ObjectId) {
+        return await UserTitle.findOne({
             userId,
-            titleId: options.titleId
+            titleId
         });
+    }
 
-        if (existing) {
-            // 如果头衔已存在且状态为撤销或过期，则恢复
-            if (existing.status === "revoked" || existing.status === "expired") {
-                existing.status = options.status || "active";
-                existing.equipped = options.equipped || false;
-                existing.metadata = options.metadata || {};
-                existing.revokedAt = undefined;
-                await existing.save();
+    /**
+     * 恢复撤销或过期的头衔
+     */
+    private static async restoreUserTitle(
+        existing: IUserTitle,
+        options: UserTitleOptions,
+        userId: mongoose.Types.ObjectId
+    ) {
+        existing.status = options.status || "active";
+        existing.equipped = options.equipped || false;
+        existing.metadata = options.metadata || {};
+        existing.revokedAt = undefined;
+        await existing.save();
 
-                // 更新缓存
-                await this.updateUserTitlesCache(userId);
-                return existing;
-            } else {
-                throw new Error("User already has this title");
-            }
-        }
+        // 更新缓存
+        await this.updateUserTitlesCache(userId);
+        return existing;
+    }
 
+    /**
+     * 创建新的用户头衔
+     */
+    private static async createNewUserTitle(
+        userId: mongoose.Types.ObjectId,
+        options: UserTitleOptions
+    ) {
         // 创建新的用户头衔
         const userTitle = new UserTitle({
             userId,
@@ -81,6 +90,35 @@ export default class UserTitleService {
         // 更新缓存
         await this.updateUserTitlesCache(userId);
         return userTitle;
+    }
+
+    /**
+     * 授予头衔给用户
+     * @param userId 用户ID
+     * @param options 头衔选项
+     * @returns 授予的用户头衔
+     */
+    static async grantTitleToUser(
+        userId: mongoose.Types.ObjectId,
+        options: UserTitleOptions
+    ): Promise<IUserTitle> {
+        // 检查头衔是否存在
+        await this.checkTitleExists(options.titleId);
+
+        // 检查用户是否已拥有该头衔
+        const existing = await this.getExistingUserTitle(userId, options.titleId);
+
+        if (existing) {
+            // 如果头衔已存在且状态为撤销或过期，则恢复
+            if (existing.status === "revoked" || existing.status === "expired") {
+                return await this.restoreUserTitle(existing, options, userId);
+            } else {
+                throw new Error("User already has this title");
+            }
+        }
+
+        // 创建新的用户头衔
+        return await this.createNewUserTitle(userId, options);
     }
 
     /**
@@ -180,7 +218,7 @@ export default class UserTitleService {
         userId: mongoose.Types.ObjectId,
         options: UserTitleQueryOptions = {}
     ): Promise<{ titles: IUserTitle[]; total: number; page: number; limit: number; totalPages: number }> {
-        const query: any = { userId };
+        const query: Record<string, unknown> = { userId };
         
         // 添加状态筛选
         if (options.status && options.status.length > 0) {
@@ -193,7 +231,7 @@ export default class UserTitleService {
         const skip = (page - 1) * limit;
 
         // 排序参数
-        const sort: any = {};
+        const sort: Record<string, 1 | -1 | "asc" | "desc"> = {};
         if (options.sortBy) {
             sort[options.sortBy] = options.sortOrder || "asc";
         } else {
@@ -377,7 +415,7 @@ export default class UserTitleService {
         let updatedCount = 0;
         
         for (const userTitle of userTitles) {
-            const title = userTitle.titleId as any;
+            const title = userTitle.titleId as { expiredAt?: Date };
             if (title && title.expiredAt && title.expiredAt < now) {
                 // 头衔已过期
                 userTitle.status = "expired";
@@ -401,7 +439,7 @@ export default class UserTitleService {
      * @param userId 用户ID
      * @returns 头衔统计信息
      */
-    static async getUserTitleStatistics(userId: mongoose.Types.ObjectId): Promise<any> {
+    static async getUserTitleStatistics(userId: mongoose.Types.ObjectId): Promise<Record<string, unknown>> {
         const userTitles = await UserTitle.find({ userId }).populate("titleId");
         
         const stats = {
@@ -426,9 +464,9 @@ export default class UserTitleService {
             stats[userTitle.status]++;
             
             // 按稀有度和类型统计
-            const title = userTitle.titleId as any;
+            const title = userTitle.titleId as { rarity: string; type: string; isTimeLimited?: boolean };
             if (title) {
-                stats.byRarity[title.rarity]++;
+                stats.byRarity[title.rarity as keyof typeof stats.byRarity]++;
                 stats.byType[title.type] = (stats.byType[title.type] || 0) + 1;
                 
                 // 按时限类型统计

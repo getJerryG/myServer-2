@@ -2,6 +2,13 @@ import axios from "axios";
 import RedisCacheManager from "@/utils/redisCache";
 import crypto from "crypto";
 
+// 微信access_token缓存接口
+interface AccessTokenCache {
+    access_token: string;
+    expires_in: number;
+    time: number;
+}
+
 /**
  * 生成微信会话签名
  * @param sessionKey 微信会话密钥
@@ -41,10 +48,10 @@ export async function getWechatSession(code: string): Promise<{ openid: string; 
  * @returns access_token
  */
 async function getAccessToken(): Promise<string> {
-    let access_Info: { access_token: string; expires_in: number; time: number } | null = null;
+    let access_Info: AccessTokenCache | null = null;
     
     try {
-        access_Info = await RedisCacheManager.get("access_token") as any;
+        access_Info = await RedisCacheManager.get<AccessTokenCache>("access_token");
         
         // 检查access_token是否存在且未过期
         if (access_Info && access_Info.access_token && Date.now() < access_Info.time + access_Info.expires_in * 1000 - 60000) {
@@ -58,7 +65,7 @@ async function getAccessToken(): Promise<string> {
         
         // 缓存access_token
         const now = Date.now();
-        const newAccessInfo = { access_token, expires_in, time: now };
+        const newAccessInfo: AccessTokenCache = { access_token, expires_in, time: now };
         await RedisCacheManager.set("access_token", newAccessInfo, expires_in - 60);
         
         return access_token;

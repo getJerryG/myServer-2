@@ -128,7 +128,10 @@ const contestScheduleSchema = new Schema<IContestSchedule>(
 
 // 创建索引
 contestScheduleSchema.index({ contest_id: 1 }, { name: "contestSchedule_contest_id_index" });
-contestScheduleSchema.index({ contest_id: 1, roundName: 1 }, { unique: true, name: "contestSchedule_contest_id_roundName_unique_index" });
+contestScheduleSchema.index(
+    { contest_id: 1, roundName: 1 }, 
+    { unique: true, name: "contestSchedule_contest_id_roundName_unique_index" }
+);
 contestScheduleSchema.index({ roundOrder: 1 }, { name: "contestSchedule_roundOrder_index" });
 contestScheduleSchema.index({ startDate: 1 }, { name: "contestSchedule_startDate_index" });
 contestScheduleSchema.index({ endDate: 1 }, { name: "contestSchedule_endDate_index" });
@@ -136,15 +139,23 @@ contestScheduleSchema.index({ createdAt: 1 }, { name: "contestSchedule_createTim
 contestScheduleSchema.index({ updatedAt: 1 }, { name: "contestSchedule_updateTime_index" });
 
 // 静态方法
-contestScheduleSchema.statics.getScheduleByContestId = async function (contest_id: string | mongoose.Types.ObjectId) {
+contestScheduleSchema.statics.getScheduleByContestId = async function (
+    contest_id: string | mongoose.Types.ObjectId
+) {
     return await this.find({ contest_id });
 };
 
-contestScheduleSchema.statics.getScheduleByRoundOrder = async function(contest_id: string | mongoose.Types.ObjectId, roundOrder: number) {
+contestScheduleSchema.statics.getScheduleByRoundOrder = async function(
+    contest_id: string | mongoose.Types.ObjectId, 
+    roundOrder: number
+) {
     return await this.findOne({ contest_id, roundOrder });
 };
 
-contestScheduleSchema.statics.getNextSchedule = async function(contest_id: string | mongoose.Types.ObjectId, currentRoundOrder: number) {
+contestScheduleSchema.statics.getNextSchedule = async function(
+    contest_id: string | mongoose.Types.ObjectId, 
+    currentRoundOrder: number
+) {
     return await this.findOne({ contest_id, roundOrder: currentRoundOrder + 1 });
 };
 

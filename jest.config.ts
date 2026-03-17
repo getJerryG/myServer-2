@@ -11,9 +11,11 @@ const config: Config = {
     testEnvironment: "node",
     // 测试文件匹配模式
     testMatch: ["**/__tests__/**/*.+(ts|tsx|js)", "**/?(*.)+(spec|test).+(ts|tsx|js)"],
+    // 排除不需要测试的文件
+    testPathIgnorePatterns: ["<rootDir>/src/test.ts"],
     // 使用ts-jest转换TypeScript文件
     transform: {
-        "^.+\.(ts|tsx)$": "ts-jest"
+        "^.+(ts|tsx)$": "ts-jest"
     },
     // 模块文件扩展名
     moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],

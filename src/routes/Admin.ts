@@ -1,5 +1,4 @@
 import express, { Request, Response, Router } from "express";
-import authMiddleware from "@/middlewares/auth";
 import UserService from "../models/User/services/userService";
 import { createAdminToken } from "@/utils/jwt";
 import { resSuccess, resBadRequest, resInternalServerError } from "../utils/res";

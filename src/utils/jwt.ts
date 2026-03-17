@@ -1,38 +1,48 @@
 import jwt from "jsonwebtoken";
 import { IJwtPayload } from "~/User";
+import { PermissionString } from "@/models/permission/types/permission-types";
+import PermissionCacheService from "@/models/permission/services/PermissionCacheService";
+import UserRoleService from "@/models/permission/services/UserRoleService";
 
 type ExpiresIn = jwt.SignOptions["expiresIn"];
 
-/**
- * 创建JWT token
- * @param payload token载荷
- * @param expiresIn 过期时间
- * @returns JWT token
- */
-export const createToken = (payload: Omit<IJwtPayload, "iat" | "exp">, expiresIn?: ExpiresIn): string => {
+export interface IJwtPayloadExtended extends IJwtPayload {
+    permissions?: PermissionString[];
+    roles?: string[];
+}
+
+export const createToken = async (payload: Omit<IJwtPayload, "iat" | "exp">, expiresIn?: ExpiresIn): Promise<{ token: string; permissions: PermissionString[]; roles: string[] }> => {
     expiresIn = expiresIn || (process.env["EXPIRES_IN"] as ExpiresIn) || "1h";
-    return jwt.sign(payload, process.env["JWT_SECRET"] as jwt.Secret, { expiresIn });
+    const token = jwt.sign(payload, process.env["JWT_SECRET"] as jwt.Secret, { expiresIn });
+
+    const {userId} = payload;
+    const permissions = await UserRoleService.getUserPermissions(userId);
+    const roles = await UserRoleService.getUserRoleCodes(userId);
+
+    await PermissionCacheService.setUserPermissions(userId, permissions, roles);
+    await PermissionCacheService.setTokenMapping(userId, token);
+
+    return { token, permissions, roles };
 };
 
-/**
- * 创建管理员JWT token
- * @param payload token载荷
- * @param expiresIn 过期时间
- * @returns JWT token
- */
-export const createAdminToken = (payload: Omit<IJwtPayload, "role" | "iat" | "exp">, expiresIn?: ExpiresIn): string => {
+export const createAdminToken = async (payload: Omit<IJwtPayload, "role" | "iat" | "exp">, expiresIn?: ExpiresIn): Promise<{ token: string; permissions: PermissionString[]; roles: string[] }> => {
     expiresIn = expiresIn || (process.env["EXPIRES_IN"] as ExpiresIn) || "1h";
-    return jwt.sign(payload, process.env["JWT_SECRET"] as jwt.Secret, { expiresIn });
+    const token = jwt.sign(payload, process.env["JWT_SECRET"] as jwt.Secret, { expiresIn });
+
+    const {userId} = payload;
+    const permissions = await UserRoleService.getUserPermissions(userId);
+    const roles = await UserRoleService.getUserRoleCodes(userId);
+
+    await PermissionCacheService.setUserPermissions(userId, permissions, roles);
+    await PermissionCacheService.setTokenMapping(userId, token);
+
+    return { token, permissions, roles };
 };
 
-/**
- * 验证JWT token
- * @param token JWT token
- * @returns 验证后的token载荷
- */
-export const verifyToken = (token: string): IJwtPayload | null => {
+export const verifyToken = async (token: string): Promise<IJwtPayloadExtended | null> => {
     try {
-        return jwt.verify(token, process.env["JWT_SECRET"] as jwt.Secret) as IJwtPayload;
+        const decoded = jwt.verify(token, process.env["JWT_SECRET"] as jwt.Secret) as IJwtPayloadExtended;
+        return decoded;
     } catch (_error) {
         return null;
     }

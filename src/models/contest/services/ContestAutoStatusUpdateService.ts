@@ -156,10 +156,13 @@ export default class ContestAutoStatusUpdateService {
      * @param now 当前时间
      * @returns 计算后的比赛状态
      */
-    static calculateMatchStatus(match: MatchInfo, date: string, now: Date): "scheduled" | "in_progress" | "completed" | "cancelled" {
+    static calculateMatchStatus(
+        match: MatchInfo, 
+        date: string, 
+        now: Date
+    ): "scheduled" | "in_progress" | "completed" | "cancelled" {
         // 结合日期和时间创建完整的比赛时间
         const fullMatchTime = new Date(`${date}T${match.time}`);
-        const oneHourLater = new Date(fullMatchTime.getTime() + 60 * 60 * 1000); // 假设比赛持续1小时
         
         // 获取当前日期（不包含时间）
         const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -206,7 +209,10 @@ export default class ContestAutoStatusUpdateService {
      * @param date 比赛日期
      * @returns 动态计算的比赛状态
      */
-    static getDynamicMatchStatus(match: MatchInfo, date: string): "scheduled" | "in_progress" | "completed" | "cancelled" {
+    static getDynamicMatchStatus(
+        match: MatchInfo, 
+        date: string
+    ): "scheduled" | "in_progress" | "completed" | "cancelled" {
         return this.calculateMatchStatus(match, date, new Date());
     }
 }

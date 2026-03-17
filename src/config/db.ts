@@ -12,7 +12,9 @@ async function connectToDatabase() {
     const maxConnectAttempts = 5;
     let attempts = 0;
     
-    const url = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.bysks.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
+    const url = "mongodb+srv://" + process.env.DB_USER + ":" + process.env.DB_PASS +
+        "@cluster0.bysks.mongodb.net/" + process.env.DB_NAME +
+        "?retryWrites=true&w=majority";
     
     async function attemptConnection() {
         attempts++;
@@ -27,7 +29,7 @@ async function connectToDatabase() {
                 await userCollection.dropIndex("email_1");
                 await userCollection.dropIndex("phone_1");
                 console.log("已删除旧索引");
-            } catch (error) {
+            } catch (_error) {
                 // 如果索引不存在，忽略错误
                 console.log("索引处理完成或不存在旧索引");
             }

@@ -1,6 +1,6 @@
-import mongoose, { Schema, Model, Document } from "mongoose";
+import mongoose, { Schema, Model } from "mongoose";
 import option from "../../db/model/option";
-import type { Timestamps, Metadata, WithMetadata, WithDocument } from "~/base-types";
+import type { Timestamps, WithMetadata, WithDocument } from "~/base-types";
 
 export enum TitleStatus {
     ACTIVE = "active",
