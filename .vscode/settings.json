@@ -1,0 +1,10 @@
+{
+  "marscode.chatLanguage": "cn",// 语言
+  "Codegeex.RepoIndex": true,// 启用仓库索引
+  "Codegeex.GenerationPreference": "line by line",
+  "marscode.codeCompletionPro": {
+    "enableCodeCompletionPro": true
+  },
+  "marscode.enableInlineCommand": true,
+  "editor.formatOnSave": true
+}
