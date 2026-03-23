@@ -1,6 +1,30 @@
+import mongoose from "mongoose";
 import UserController from "../config/UserController";
 import UserModel from "../models/users";
-import type { IUser, UserType } from "../types/user";
+
+// 定义与 types/User.d.ts 中一致的接口
+interface UserType {
+    nickname?: string;
+    gamename?: string;
+    avatar?: string;
+    status?: 0 | 1 | 2 | 3 | 4;
+    role?: 0 | 1 | 2;
+    sex?: 0 | 1 | 2;
+    openId?: string;
+    session_key?: string;
+}
+
+interface IUser extends UserType {
+    userId: number;
+    user_title?: mongoose.Schema.Types.ObjectId[];
+    signIn?: {
+        signInDays: number;
+        lastSignInTime: Date;
+    };
+    permission?: number;
+    roleIds?: mongoose.Schema.Types.ObjectId[];
+    permissionsUpdatedAt?: Date;
+}
 
 /**
  * 用户数据处理类

@@ -1,7 +1,7 @@
 import { Document, Schema } from "mongoose";
 import type { Timestamps } from "~/base-types";
 
-export type UserStatus = 0 | 1 | 2 | 3;
+export type UserStatus = 0 | 1 | 2 | 3 | 4;
 
 export type UserRole = 0 | 1 | 2;
 

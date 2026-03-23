@@ -2,11 +2,12 @@ import mongoose, { Schema, Model, Document } from "mongoose";
 import option from "../../../db/model/option";
 import AutoIncrementFactory from "mongoose-sequence";
 import signInSchema from "./signIn";
-import { IUser } from "@/types/user";
+import { IUser } from "types/User";
 import { ObjectId } from "mongoose";
 
 interface UserDocument extends IUser, Document {
     id: string;
+    userId: number;
     roleIds: ObjectId[];
     permissionsUpdatedAt?: Date;
     userID?: string;
