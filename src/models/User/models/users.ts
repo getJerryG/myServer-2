@@ -1,22 +1,46 @@
-import mongoose, { Schema, Model, Document } from "mongoose";
+import mongoose, { Schema, Model, Document, ObjectId } from "mongoose";
 import option from "../../../db/model/option";
 import AutoIncrementFactory from "mongoose-sequence";
 import signInSchema from "./signIn";
-import { IUser } from "types/User";
-import { ObjectId } from "mongoose";
+
+// 直接定义IUser接口，与types/User.d.ts保持一致
+interface Timestamps {
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export type UserStatus = 0 | 1 | 2 | 3 | 4;
+export type UserRole = 0 | 1 | 2;
+export type UserSex = 0 | 1 | 2;
+
+interface UserSignIn {
+    signInDays: number;
+    lastSignInTime: Date;
+}
+
+interface UserBase extends Timestamps {
+    userId: number;
+    userID: string;
+    openId: string;
+    user_title: Schema.Types.ObjectId[];
+    nickname: string;
+    gamename: string;
+    sex: UserSex;
+    avatar: string;
+    exp: number;
+    status: UserStatus;
+    role: UserRole;
+    session_key: string;
+    signIn: UserSignIn;
+    permission: number;
+    roleIds: Schema.Types.ObjectId[];
+    permissionsUpdatedAt?: Date;
+}
+
+type IUser = UserBase;
 
 interface UserDocument extends IUser, Document {
     id: string;
-    userId: number;
-    roleIds: ObjectId[];
-    permissionsUpdatedAt?: Date;
-    userID?: string;
-    gamename?: string;
-    exp?: number;
-    signIn?: {
-        signInDays: number;
-        lastSignInTime: Date;
-    };
 }
 
 const userSchema = new Schema<UserDocument>(

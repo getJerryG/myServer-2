@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 // 定义用户控制器数据接口，使用与 types/User.d.ts 中 UserBase 一致的字段
 export interface UserControllerData {
@@ -6,7 +6,7 @@ export interface UserControllerData {
     avatar?: string;
     status?: 0 | 1 | 2 | 3 | 4;
     role?: 0 | 1 | 2;
-    user_title?: mongoose.Schema.Types.ObjectId[];
+    user_title?: Schema.Types.ObjectId[];
     openId?: string;
     session_key?: string;
     sex?: 0 | 1 | 2;
