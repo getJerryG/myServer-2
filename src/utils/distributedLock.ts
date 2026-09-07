@@ -1,5 +1,4 @@
 import Redis from "ioredis";
-import { v4 as uuidv4 } from "uuid";
 
 /**
  * Redis 分布式锁实现
@@ -31,7 +30,7 @@ export class DistributedLock {
      */
     async acquire(key: string, expireTime?: number): Promise<string | null> {
         const lockKey = `${this.lockPrefix}${key}`;
-        const lockValue = uuidv4(); // 生成唯一标识
+        const lockValue = crypto.randomUUID(); // 生成唯一标识
         const expire = expireTime || this.defaultExpireTime;
         
         // Lua脚本：原子性设置锁

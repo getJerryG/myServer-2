@@ -1,6 +1,5 @@
 import cors, { CorsOptions } from "cors";
 import express from "express";
-import bodyParser from "body-parser";
 import rateLimit from "express-rate-limit";
 import usersRoutes from "./routes/userRoutes";
 import recordRoutes from "./routes/RocordRoutes";
@@ -42,7 +41,7 @@ const limiter = rateLimit({
 app.use(cors(corsOptions)); // 启用CORS
 app.use(limiter); // 应用请求频率限制
 // app.use(maintenance); // 使用维护中间件
-app.use(bodyParser.json()); // 解析JSON请求体
+app.use(express.json()); // 解析JSON请求体
 
 app.get("/", (_, res) => {
     res.send("Hello!");

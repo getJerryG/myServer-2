@@ -1,4 +1,3 @@
-import { v4 as uuid } from "uuid";
 import ThreadPool from "@/core/ThreadPool";
 
 /**
@@ -14,7 +13,7 @@ export class BetScore {
     betType: 0 | 1;
 
     constructor(readonly openId: string, readonly betAmount: number, betType: 0 | 1) {
-        this.id = uuid();
+        this.id = crypto.randomUUID();
         this.from = openId;
         this.betScore = betAmount;
         this.reward = 0;
@@ -74,7 +73,7 @@ export default class RoomBetScore {
 
     constructor(options?: RoomBetOptions) {
         this._bets = new Map<string, BetScore>();
-        this.id = uuid();
+        this.id = crypto.randomUUID();
         this.status = 0; // 0: 未开始, 1: 进行中, 2: 已结束
         this.isWin = false;
         this.options = options;

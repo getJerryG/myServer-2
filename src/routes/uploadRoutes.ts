@@ -6,7 +6,6 @@ import upload from "@/middlewares/upload";
 import authMiddleware from "@/middlewares/auth";
 import UserService from "@/models/User/services/userService";
 import RedisCacheManager from "@/utils/redisCache"; //  RedisCache 
-import { v4 as uuid } from "uuid";
 import sharp from "sharp";
 
 const router = express.Router();
@@ -33,7 +32,7 @@ router.post("/uploadAvatar", authMiddleware, upload.single("file"), async (req: 
         await fs.promises.mkdir(targetFolder, { recursive: true });
 
         // 生成新的文件名
-        const fileName = `${uuid().slice(0, 6)}-${userId}`;
+        const fileName = `${crypto.randomUUID().slice(0, 6)}-${userId}`;
         const fullTargetPath = path.join(targetFolder, `${fileName}.webp`);
 
         // 处理旧头像文件

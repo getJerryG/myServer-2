@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
 import schedule from "node-schedule";
 
 class CountDown {
@@ -10,7 +9,7 @@ class CountDown {
     job: schedule.Job | null;
     
     constructor(time: number, cb: () => void) {
-        this.id = uuidv4();
+        this.id = crypto.randomUUID();
         this.time = time;
         this.createDate = Date.now();
         this.cb = cb;
