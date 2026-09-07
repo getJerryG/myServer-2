@@ -1,5 +1,5 @@
-import mongoose, { Schema, Model } from "mongoose";
-import option from "../../../db/model/option";
+﻿import mongoose, { Schema, Model } from "mongoose";
+import option from "@/models/shared/option";
 import { IPermission } from "../types/permission-types";
 
 const permissionSchema = new Schema<IPermission>(

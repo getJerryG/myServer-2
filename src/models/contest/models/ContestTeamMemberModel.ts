@@ -1,5 +1,5 @@
-import mongoose, { Schema, Model } from "mongoose";
-import option from "../../../db/model/option";
+﻿import mongoose, { Schema, Model } from "mongoose";
+import option from "@/models/shared/option";
 import { IContestTeamMember } from "../types/contest";
 
 // 竞赛队伍成员Schema

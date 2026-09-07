@@ -1,5 +1,5 @@
 import { Schema, FilterQuery } from "mongoose";
-import { RewardRecord, RewardStat } from "@/db/model/RewardModel";
+import { RewardRecord, RewardStat } from "@/models/Reward/rewardModel";
 import { RewardType, RewardStatus } from "@/data/Reward-enum";
 
 /**

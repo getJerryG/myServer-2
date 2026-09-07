@@ -1,4 +1,4 @@
-import { RecordItem } from "@/db/model/record";
+import { RecordItem } from "@/models/contest/models/recordModel";
 
 // 比赛记录选项接口
 export interface RecordsOption {

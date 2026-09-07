@@ -1,5 +1,5 @@
-import mongoose, { Schema, Model, Document, ObjectId } from "mongoose";
-import option from "../../../db/model/option";
+﻿import mongoose, { Schema, Model, Document, ObjectId } from "mongoose";
+import option from "@/models/shared/option";
 import AutoIncrementFactory from "mongoose-sequence";
 import signInSchema from "./signIn";
 

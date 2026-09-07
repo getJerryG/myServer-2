@@ -1,4 +1,4 @@
-import GoodsModel from "../../../db/model/goods";
+import GoodsModel from "@/models/goods/goodsModel";
 import {
     Goods,
     GoodsCreateRequest,
