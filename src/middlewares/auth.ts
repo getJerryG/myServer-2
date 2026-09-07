@@ -1,45 +1,50 @@
 import { Request, Response, NextFunction } from "express";
-import { Socket } from "socket.io";
-import { ExtendedError } from "socket.io/dist/namespace";
 import { verifyToken, IJwtPayloadExtended } from "@/utils/jwt";
-import { PermissionError } from "@/utils/errors";
 import PermissionCacheService from "@/models/permission/services/PermissionCacheService";
+import UserRoleService from "@/models/permission/services/UserRoleService";
 
-type IUser = IJwtPayloadExtended | IAdminJwtPayload;
-
-interface IAuth {
-    user: IUser;
+interface RequestWithAuth extends Request {
+    user: IJwtPayloadExtended;
 }
 
-type SocketWithAuth = Socket & IAuth;
-
-type RequestWithAuth = Request & IAuth;
-
+function extractTokenFromHeader(authHeader: string | undefined): string | null {
+    if (!authHeader) {
+        return null;
+    }
+    const parts = authHeader.split(" ");
+    if (parts.length === 2 && parts[0] === "Bearer") {
+        const token = parts[1];
+        return token === undefined ? null : token;
+    }
+    return null;
+}
 
 /**
  * 认证中间件
- * @description 验证用户token
- * @returns 认证中间件
+ * 验证用户 token，加载权限到 req.user
  */
 export async function authMiddleware(req: RequestWithAuth, res: Response, next: NextFunction) {
     try {
         const token = extractTokenFromHeader(req.headers.authorization);
         if (!token) {
-            return res.status(401).json({ errCode: 4011001, message: "缺少token" });
+            res.status(401).json({ errCode: 4011001, message: "缺少token" });
+            return;
         }
 
-        const decoded = verifyToken(token);
+        const decoded = await verifyToken(token);
         if (!decoded) {
-            return res.status(401).json({ errCode: 4011003, message: "token无效" });
+            res.status(401).json({ errCode: 4011003, message: "token无效" });
+            return;
         }
 
-        const {userId} = decoded;
-        const userPermissions = await PermissionCacheService.getUserPermissions(userId);
+        const { userId } = decoded;
+        let userPermissions = await PermissionCacheService.getUserPermissions(String(userId));
 
         if (!userPermissions) {
-            const permissions = await UserRoleService.getUserPermissions(userId);
-            const roles = await UserRoleService.getUserRoleCodes(userId);
-            await PermissionCacheService.setUserPermissions(userId, permissions, roles);
+            const permissions = await UserRoleService.getUserPermissions(String(userId));
+            const roles = await UserRoleService.getUserRoleCodes(String(userId));
+            await PermissionCacheService.setUserPermissions(String(userId), permissions, roles);
+            userPermissions = await PermissionCacheService.getUserPermissions(String(userId));
         }
 
         req.user = {
@@ -50,149 +55,9 @@ export async function authMiddleware(req: RequestWithAuth, res: Response, next: 
 
         next();
     } catch {
-        return res.status(401).json({ errCode: 4011002, message: "token过期" });
+        res.status(401).json({ errCode: 4011002, message: "token过期" });
+        return;
     }
-};
-
-/**
- * Socket.io JWT 身份验证中间件
- */
-export const socketAuthMiddleware = async (
-    socket: SocketWithAuth,
-    next: (err?: ExtendedError) => void
-) => {
-    try {
-        const { token } = socket.handshake.auth;
-        if (!token) {
-            throw new PermissionError("缺少身份验证令牌");
-        }
-
-        const decoded = verifyToken(token);
-        if (!decoded) {
-            throw new PermissionError("身份验证失败");
-        }
-
-        socket.user = {
-            id: decoded.userId,
-            username: decoded.username || "",
-            role: decoded.role as UserRole
-        };
-
-        next();
-    } catch {
-        next(new PermissionError("身份验证失败"));
-    }
-};
-
-/**
- * 检查用户是否有权限执行特定操作
- * @param userRole 用户角色
- * @param operation 操作类型
- * @returns 是否有权限
- */
-export const checkPermission = (
-    userRole: UserRole,
-    operation: RoomOperation
-): boolean => {
-    const allowedOperations = RoomPermissions[userRole];
-    return allowedOperations.includes("*") || allowedOperations.includes(operation);
-};
-
-/**
- * 角色验证装饰器
- * @param requiredRoles 需要的角色
- */
-export function RequireRole(requiredRoles: UserRole | UserRole[]) {
-    return function (
-        _target: object,
-        _propertyKey: string,
-        descriptor: PropertyDescriptor
-    ) {
-        const originalMethod = descriptor.value;
-
-        descriptor.value = function (...args: unknown[]) {
-            const socket = args[0] as SocketWithAuth;
-            if (!socket.user) {
-                throw new PermissionError("未通过身份验证");
-            }
-
-            const roles = Array.isArray(requiredRoles) ? requiredRoles : [requiredRoles];
-            if (!roles.includes(socket.user.role)) {
-                throw new PermissionError("权限不足");
-            }
-
-            return originalMethod.apply(this, args);
-        };
-
-        return descriptor;
-    };
-}
-
-/**
- * 操作权限验证装饰器
- * @param operation 需要的操作权限
- */
-export function RequirePermission(operation: RoomOperation) {
-    return function (
-        _target: object,
-        _propertyKey: string,
-        descriptor: PropertyDescriptor
-    ) {
-        const originalMethod = descriptor.value;
-
-        descriptor.value = function (...args: unknown[]) {
-            const socket = args[0] as SocketWithAuth;
-            if (!socket.user) {
-                throw new PermissionError("未通过身份验证");
-            }
-
-            if (!checkPermission(socket.user.role, operation)) {
-                throw new PermissionError("权限不足");
-            }
-
-            return originalMethod.apply(this, args);
-        };
-
-        return descriptor;
-    };
-}
-
-/**
- * 角色和操作权限双重验证装饰器
- * @param roles 需要的角色
- * @param operation 需要的操作权限
- */
-export function RequireRoleAndPermission(
-    roles: UserRole | UserRole[],
-    operation: RoomOperation
-) {
-    return function (
-        _target: object,
-        _propertyKey: string,
-        descriptor: PropertyDescriptor
-    ) {
-        const originalMethod = descriptor.value;
-
-        descriptor.value = function (...args: unknown[]) {
-            const socket = args[0] as SocketWithAuth;
-            if (!socket.user) {
-                throw new PermissionError("未通过身份验证");
-            }
-
-            const requiredRoles = Array.isArray(roles) ? roles : [roles];
-            if (!requiredRoles.includes(socket.user.role)) {
-                throw new PermissionError("权限不足");
-            }
-
-            if (!checkPermission(socket.user.role, operation)) {
-                throw new PermissionError("权限不足");
-            }
-
-            return originalMethod.apply(this, args);
-        };
-
-        return descriptor;
-    };
 }
 
 export default authMiddleware;

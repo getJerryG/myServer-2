@@ -14,7 +14,7 @@ export function writeJsonFile(path: string, data: Record<string, unknown>): void
     try {
         fs.writeFileSync(path, JSON.stringify(data, null, 2));
     } catch (err) {
-        console.error("Error writing JSON file:", err);
+        console.error(`Error writing JSON file ${path}:`, err);
         throw err;
     }
 }
@@ -29,7 +29,7 @@ export function readJsonFile<T = unknown>(path: string): T {
         const fileData = fs.readFileSync(path, "utf8");
         return JSON.parse(fileData) as T;
     } catch (err) {
-        console.error("Error reading JSON file:", err);
+        console.error(`Error reading JSON file ${path}:`, err);
         throw err;
     }
 }
@@ -44,17 +44,17 @@ export function updateJsonFile(path: string, data: Record<string, unknown>): voi
         // 读取现有数据
         const fileData = fs.readFileSync(path, "utf8");
         const parsedData: Record<string, unknown> = JSON.parse(fileData);
-        
+
         // 合并新数据
         const updatedData = {
             ...parsedData,
             ...(typeof data === "string" ? JSON.parse(data) : data)
         };
-        
+
         // 写入更新后的数据
         fs.writeFileSync(path, JSON.stringify(updatedData, null, 2));
     } catch (err) {
-        console.error("Error updating JSON file:", err);
+        console.error(`Error updating JSON file ${path}:`, err);
         throw err;
     }
 }
@@ -69,19 +69,19 @@ export function appendToJsonFile(path: string, data: Record<string, unknown>): v
         // 读取现有数据
         const fileData = fs.readFileSync(path, "utf8");
         const parsedData: Record<string, unknown>[] = JSON.parse(fileData);
-        
+
         // 确保是数组
         if (!Array.isArray(parsedData)) {
             throw new Error("File content is not an array");
         }
-        
+
         // 追加数据
         parsedData.push(data);
-        
+
         // 写入更新后的数据
         fs.writeFileSync(path, JSON.stringify(parsedData, null, 2));
     } catch (err) {
-        console.error("Error appending to JSON file:", err);
+        console.error(`Error appending to JSON file ${path}:`, err);
         throw err;
     }
 }
@@ -96,7 +96,7 @@ export function ensureDir(dirPath: string): void {
             fs.mkdirSync(dirPath, { recursive: true });
         }
     } catch (err) {
-        console.error("Error ensuring directory exists:", err);
+        console.error(`Error ensuring directory exists ${dirPath}:`, err);
         throw err;
     }
 }
@@ -111,7 +111,8 @@ export function deleteFile(filePath: string): void {
             fs.unlinkSync(filePath);
         }
     } catch (err) {
-        console.error("Error deleting file:", err);
+        console.error(`Error deleting file ${filePath}:`, err);
+        // 抛出错误，确保调用者知道失败
         throw err;
     }
 }
@@ -127,7 +128,7 @@ export function copyFile(srcPath: string, destPath: string): void {
         ensureDir(path.dirname(destPath));
         fs.copyFileSync(srcPath, destPath);
     } catch (err) {
-        console.error("Error copying file:", err);
+        console.error(`Error copying file ${srcPath} to ${destPath}:`, err);
         throw err;
     }
 }
@@ -143,7 +144,7 @@ export function moveFile(srcPath: string, destPath: string): void {
         ensureDir(path.dirname(destPath));
         fs.renameSync(srcPath, destPath);
     } catch (err) {
-        console.error("Error moving file:", err);
+        console.error(`Error moving file ${srcPath} to ${destPath}:`, err);
         throw err;
     }
 }

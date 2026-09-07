@@ -32,27 +32,27 @@ function getMimeType(filename: string): string {
 async function traverseDirectory(directory: string): Promise<string[]> {
     try {
         const results: string[] = [];
-        
+
         // 读取目录内容
         const entries = await fs.promises.readdir(directory, { withFileTypes: true });
-        
+
         // 遍历目录条目
         for (const entry of entries) {
             const itemPath = path.join(directory, entry.name);
-            
+
             if (entry.isDirectory()) {
                 // 递归处理子目录
                 const subDirResults = await traverseDirectory(itemPath);
                 results.push(...subDirResults);
             } else {
                 // 处理文件，不需要读取文件内容，只需要路径
-                
+
                 // 归一化路径
                 const normalizedPath = itemPath.replace("public/", "/");
                 results.push(normalizedPath);
             }
         }
-        
+
         return results;
     } catch (err) {
         console.error(`Error traversing directory ${directory}:`, err);
@@ -84,7 +84,7 @@ export async function imageToBase64(filePath: string): Promise<string> {
         const fileData = await fs.promises.readFile(filePath);
         const base64Data = fileData.toString("base64");
         const mimeType = getMimeType(filePath);
-        
+
         return `data:${mimeType};base64,${base64Data}`;
     } catch (err) {
         console.error(`Error converting image ${filePath} to base64:`, err);
@@ -100,11 +100,11 @@ export async function imageToBase64(filePath: string): Promise<string> {
 export async function deleteImages(destinationFolderPath: string, imagePaths: string[]): Promise<void> {
     try {
         console.log("deleteImages", destinationFolderPath, imagePaths);
-        
+
         for (const imagePath of imagePaths) {
             const imageFilePath = path.join(destinationFolderPath, imagePath);
             console.log("deleteImages", imageFilePath);
-            
+
             try {
                 await fs.promises.unlink(imageFilePath);
                 console.log(`Deleted image: ${imageFilePath}`);
@@ -114,7 +114,7 @@ export async function deleteImages(destinationFolderPath: string, imagePaths: st
             }
         }
     } catch (err) {
-        console.error("Error in deleteImages:", err);
+        console.error(`Error in deleteImages ${imagePaths.join(", ")}:`, err);
         throw err;
     }
 }

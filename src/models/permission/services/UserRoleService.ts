@@ -1,6 +1,6 @@
 import UserRoleModel from "../models/UserRoleModel";
 import RoleModel from "../models/RoleModel";
-import { IUserRole } from "../types/permission-types";
+import type { IUserRole, PermissionString } from "../types/permission-types";
 
 export default class UserRoleService {
     static async createUserRole(data: Omit<IUserRole, "_id" | "createdAt" | "updatedAt">) {
@@ -100,9 +100,9 @@ export default class UserRoleService {
         return await this.assignRolesToUser(userId, [contestViewerRole._id.toString()], assignedBy);
     }
 
-    static async getUserPermissions(userId: string): Promise<string[]> {
+    static async getUserPermissions(userId: string): Promise<PermissionString[]> {
         const userRoles = await this.getUserRoles(userId);
-        const permissions: string[] = [];
+        const permissions: PermissionString[] = [];
 
         for (const userRole of userRoles) {
             const role = await RoleModel.getRoleByCode(userRole.roleId.toString());

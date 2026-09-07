@@ -32,9 +32,9 @@ export function generateCacheKey(cacheKey: string, params: Record<string, string
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([key, value]) => `${key}:${value}`)
         .join(":");
-    
+
     const versionStr = version ? `:${version}` : "";
-    
+
     return paramStr ? `${cacheKey}:${paramStr}${versionStr}` : `${cacheKey}${versionStr}`;
 }
 
@@ -101,7 +101,7 @@ export class CacheConsistencyManager {
     ): Promise<number> {
         try {
             let invalidatedCount = 0;
-            
+
             for (const params of paramsList) {
                 const key = generateCacheKey(cacheKey, params, version);
                 const success = await redisCache.del(key);
@@ -109,10 +109,10 @@ export class CacheConsistencyManager {
                     invalidatedCount++;
                 }
             }
-            
+
             return invalidatedCount;
         } catch (error) {
-            console.error("Error batch invalidating cache:", error);
+            console.error(`Error batch invalidating cache ${cacheKey}:`, error);
             return 0;
         }
     }
@@ -132,22 +132,22 @@ export class CacheConsistencyManager {
             // 实现通过模式删除缓存的功能
             let invalidatedCount = 0;
             let cursor = "0";
-            
+
             do {
                 // 使用redis.scan获取匹配的键
                 const [newCursor, keys] = await redis.scan(cursor, "MATCH", pattern, "COUNT", 1000);
                 cursor = newCursor;
-                
+
                 if (keys.length > 0) {
                     // 删除匹配的键
                     const result = await redis.del(...keys);
                     invalidatedCount += result;
                 }
             } while (cursor !== "0");
-            
+
             return invalidatedCount;
         } catch (error) {
-            console.error("Error invalidating all related cache:", error);
+            console.error(`Error invalidating all related cache ${cacheKey}:`, error);
             return 0;
         }
     }
@@ -168,24 +168,24 @@ export class CacheConsistencyManager {
     ): Promise<T | undefined> {
         try {
             const key = generateCacheKey(cacheKey, params, version);
-            
+
             // 尝试从缓存获取数据
             const cachedData = await redisCache.get<T>(key);
             if (cachedData) {
                 return cachedData;
             }
-            
+
             // 缓存不存在，从数据源获取
             const data = await fetchData();
             if (!data) {
                 return undefined;
             }
-            
+
             // 存入缓存
             await redisCache.set(key, data);
             return data;
         } catch (error) {
-            console.error("Error syncing cache:", error);
+            console.error(`Error syncing cache ${cacheKey}:`, error);
             return undefined;
         }
     }
@@ -206,7 +206,7 @@ export class CacheConsistencyManager {
     ): Promise<number> {
         try {
             let preloadedCount = 0;
-            
+
             for (const params of paramsList) {
                 const data = await fetchData(params);
                 if (data) {
@@ -216,10 +216,10 @@ export class CacheConsistencyManager {
                     }
                 }
             }
-            
+
             return preloadedCount;
         } catch (error) {
-            console.error("Error preloading cache:", error);
+            console.error(`Error preloading cache ${cacheKey}:`, error);
             return 0;
         }
     }
@@ -319,12 +319,12 @@ export class CacheConsistencyManager {
          * 使头衔统计缓存失效
          * @returns 是否成功
          */
-        async invalidateTitleStatsCache(): Promise<number> {
+        async invalidateTitleStatsCache(): Promise<boolean> {
             return CacheConsistencyManager.invalidateCache(
                 CACHE_KEYS.TITLE_STATS,
                 {},
                 CACHE_VERSION.TITLE
-            ) ? 1 : 0;
+            );
         },
 
         /**
@@ -339,11 +339,11 @@ export class CacheConsistencyManager {
                 paramsList,
                 CACHE_VERSION.TITLE
             );
-            
+
             // 同时使头衔列表和统计缓存失效
             await CacheConsistencyManager.titleCache.invalidateTitleListCache();
             await CacheConsistencyManager.titleCache.invalidateTitleStatsCache();
-            
+
             return invalidatedCount + 2;
         }
     };

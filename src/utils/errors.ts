@@ -41,7 +41,7 @@ export class RoomError extends Error {
     ) {
         super(message);
         this.name = "RoomError";
-        
+
         // 捕获堆栈跟踪
         if (Error.captureStackTrace) {
             Error.captureStackTrace(this, RoomError);
@@ -117,7 +117,7 @@ export class InvalidOperationError extends RoomError {
  */
 export class RoomNotFoundError extends RoomError {
     constructor(message = "房间未找到") {
-        super(RoomErrorType.ROOM_NOT_FOUND, message, 404);
+        super(RoomErrorType.ROOM_NOT_EXIST, message, 404);
         this.name = "RoomNotFoundError";
     }
 }
@@ -171,10 +171,11 @@ export const broadcastErrorEvent = (socket: Socket, roomId: string, error: RoomE
  * @param req 请求对象
  * @param res 响应对象
  * @param _next 下一个中间件
+ * @param next 下一个中间件
  */
 export const errorHandler = (err: unknown, req: Request, res: Response, _next: NextFunction): void => {
-    console.error("Error occurred:", err);
-    
+    console.error(`Error occurred ${req.method} ${req.url}:`, err);
+
     if (err instanceof RoomError) {
         res.status(err.status).json({
             error: {

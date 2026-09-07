@@ -27,7 +27,7 @@ export class DBOptimizer {
             }
             return entity[idField]?.toString() || null;
         } catch (error) {
-            console.error("Error getting entity ID:", error);
+            console.error(`Error getting entity ID for query ${JSON.stringify(query)}:`, error);
             return null;
         }
     }
@@ -45,7 +45,7 @@ export class DBOptimizer {
         idField: string = "_id"
     ): Promise<(string | null)[]> {
         try {
-            const promises = queries.map(query => 
+            const promises = queries.map(query =>
                 this.getEntityId(model, query, idField)
             );
             return await Promise.all(promises);

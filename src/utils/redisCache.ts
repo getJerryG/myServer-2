@@ -15,10 +15,10 @@ export default class RedisCacheManager {
         errorCount: 0,
         startTime: Date.now()
     };
-    
+
     private static bloomFilter: BloomFilter = new BloomFilter(redis, "bloom:filter", 1000000, 0.0001);
 
-    
+
     /**
      * Get cache metrics
      */
@@ -26,7 +26,7 @@ export default class RedisCacheManager {
         const total = this.metrics.hitCount + this.metrics.missCount;
         const hitRate = total === 0 ? 0 : parseFloat(((this.metrics.hitCount / total) * 100).toFixed(2));
         const uptime = Date.now() - this.metrics.startTime;
-        
+
         return {
             ...this.metrics,
             hitRate,
@@ -34,7 +34,7 @@ export default class RedisCacheManager {
             timestamp: Date.now()
         };
     }
-    
+
     /**
      * Reset cache metrics
      */
@@ -49,16 +49,16 @@ export default class RedisCacheManager {
             startTime: Date.now()
         };
     }
-    
+
     /**
      * Get bloom filter instance
      */
     public static getBloomFilter(): BloomFilter {
         return this.bloomFilter;
     }
-    
-    
-    
+
+
+
     /**
      * Scan keys with pattern
      * @param pattern - Redis key pattern
@@ -66,16 +66,16 @@ export default class RedisCacheManager {
     private static async scanKeys(pattern = "*"): Promise<string[]> {
         const keys: string[] = [];
         let cursor = "0";
-        
+
         do {
             const [newCursor, foundKeys] = await redis.scan(cursor, "MATCH", pattern, "COUNT", 1000);
             cursor = newCursor;
             keys.push(...foundKeys);
         } while (cursor !== "0");
-        
+
         return keys;
     }
-    
+
     /**
      * Set cache value
      * @param key - Redis key
@@ -85,16 +85,16 @@ export default class RedisCacheManager {
     public static async set<T>(key: string, value: T, ttl?: number): Promise<boolean> {
         try {
             const serializedValue = JSON.stringify(value);
-            
+
             if (ttl) {
                 await redis.setex(key, ttl, serializedValue);
             } else {
                 await redis.set(key, serializedValue);
             }
-            
+
             await this.bloomFilter.add(key);
             this.metrics.setCount++;
-            
+
             return true;
         } catch (error) {
             console.error(`Failed to set cache for ${key}:`, error);
@@ -102,7 +102,7 @@ export default class RedisCacheManager {
             return false;
         }
     }
-    
+
     /**
      * Get cache value
      * @param key - Redis key
@@ -110,14 +110,14 @@ export default class RedisCacheManager {
     public static async get<T>(key: string): Promise<T | undefined> {
         try {
             this.metrics.getCount++;
-            
+
             const value = await redis.get(key);
-            
+
             if (!value || value === "__EMPTY__") {
                 this.metrics.missCount++;
                 return undefined;
             }
-            
+
             this.metrics.hitCount++;
             return JSON.parse(value) as T;
         } catch (error) {
@@ -127,7 +127,7 @@ export default class RedisCacheManager {
             return undefined;
         }
     }
-    
+
     /**
      * Delete cache key
      * @param key - Redis key
@@ -143,15 +143,22 @@ export default class RedisCacheManager {
             return 0;
         }
     }
-    
+
     /**
      * Flush all cache
      */
     public static async flushAll(): Promise<void> {
         try {
             await redis.flushall();
+            this.metrics.delCount = 0;
+            this.metrics.hitCount = 0;
+            this.metrics.missCount = 0;
+            this.metrics.setCount = 0;
+            this.metrics.getCount = 0;
+            this.metrics.errorCount = 0;
+            this.metrics.startTime = Date.now();
         } catch (error) {
-            console.error("Failed to flush all cache:", error);
+            console.error(`Failed to flush all cache:`, error);
             throw new Error(`Failed to flush cache: ${(error as Error).message}`);
         }
     }

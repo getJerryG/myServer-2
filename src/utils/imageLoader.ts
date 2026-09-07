@@ -19,11 +19,11 @@ export async function findImage(imagePath: string): Promise<string> {
         if (imageCache[imagePath]) {
             return imageCache[imagePath];
         }
-        
+
         // 构建完整的图片路径
         const publicPath = path.join(__dirname, "../public");
         const fullPath = path.join(publicPath, imagePath);
-        
+
         // 检查图片文件是否存在
         if (fs.existsSync(fullPath)) {
             // 返回图片的相对路径
@@ -31,11 +31,11 @@ export async function findImage(imagePath: string): Promise<string> {
             imageCache[imagePath] = relativePath;
             return relativePath;
         } else {
-            console.error("Image not found:", fullPath);
+            console.error(`Image not found: ${fullPath}`);
             return "";
         }
     } catch (err) {
-        console.error("Error finding image:", imagePath, err);
+        console.error(`Error finding image ${imagePath}:`, err);
         return "";
     }
 }
@@ -49,6 +49,7 @@ export async function preloadImages(paths: string[]): Promise<void> {
         const promises = paths.map(path => findImage(path));
         await Promise.all(promises);
     } catch (err) {
-        console.error("Error preloading images:", err);
+        console.error(`Error preloading images: ${paths.join(", ")}:`, err);
+        throw err;
     }
 }

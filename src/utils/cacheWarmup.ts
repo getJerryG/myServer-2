@@ -24,7 +24,7 @@ export interface WarmupTask {
 export class HotDataDetector {
     private accessLogKey = "access:log";
     private hotDataKey = "hot:data";
-    
+
     /**
      * 记录访问
      * @param key 访问的键
@@ -33,7 +33,7 @@ export class HotDataDetector {
         // 使用Sorted Set记录访问次数
         await redis.zincrby(this.accessLogKey, 1, key);
     }
-    
+
     /**
      * 检测热点数据
      * @param topN 取前N个热点数据，默认1000
@@ -41,26 +41,26 @@ export class HotDataDetector {
     async detectHotData(topN = 1000): Promise<string[]> {
         // 获取topN个访问量最高的键
         const hotKeys = await redis.zrevrange(this.accessLogKey, 0, topN - 1);
-        
+
         // 存储热点数据
         await redis.del(this.hotDataKey);
         if (hotKeys.length > 0) {
             await redis.sadd(this.hotDataKey, ...hotKeys);
         }
-        
+
         // 清空访问日志
         await redis.del(this.accessLogKey);
-        
+
         return hotKeys;
     }
-    
+
     /**
      * 获取热点数据
      */
     async getHotData(): Promise<string[]> {
         return redis.smembers(this.hotDataKey);
     }
-    
+
     /**
      * 检查是否为热点数据
      * @param key 要检查的键
@@ -94,7 +94,7 @@ export class CacheWarmupManager {
             priority: 5, // 默认优先级为5
             ...task
         });
-        
+
         // 按优先级排序，优先级高的先执行
         this.tasks.sort((a, b) => (a.priority || 5) - (b.priority || 5));
     }
@@ -107,19 +107,20 @@ export class CacheWarmupManager {
             console.log("预热任务正在执行中，请勿重复调用");
             return;
         }
-        
+
         console.log("开始执行缓存预热任务...");
         this.isExecuting = true;
         const startTime = Date.now();
-        
+
         try {
             // 并行执行所有任务
             await Promise.all(this.tasks.map((task) => this.executeTask(task)));
-            
+
+            // 记录预热耗时
             const endTime = Date.now();
             console.log(`缓存预热完成，共执行 ${this.tasks.length} 个任务，耗时 ${endTime - startTime}ms`);
         } catch (error) {
-            console.error("缓存预热执行失败:", error);
+            console.error(`缓存预热执行失败: ${error}`);
         } finally {
             this.isExecuting = false;
         }
@@ -132,7 +133,7 @@ export class CacheWarmupManager {
     private async executeTask(task: WarmupTask): Promise<void> {
         console.log(`开始执行预热任务: ${task.name}`);
         const taskStartTime = Date.now();
-        
+
         try {
             await task.execute();
             const taskEndTime = Date.now();
@@ -155,10 +156,10 @@ export class CacheWarmupManager {
      */
     startHotDataUpdateTask(interval = 3600000): void {
         console.log(`启动热点数据更新任务，更新间隔: ${interval / 1000}秒`);
-        
+
         // 立即执行一次
         this.updateHotData();
-        
+
         // 设置定时任务
         setInterval(() => {
             this.updateHotData();
@@ -171,15 +172,15 @@ export class CacheWarmupManager {
     private async updateHotData(): Promise<void> {
         console.log("开始更新热点数据...");
         const startTime = Date.now();
-        
+
         try {
             // 检测热点数据
             const hotKeys = await this.hotDataDetector.detectHotData(1000);
             console.log(`热点数据更新完成，共检测到 ${hotKeys.length} 个热点数据`);
-            
+
             // 这里可以添加热点数据的处理逻辑
         } catch (error) {
-            console.error("热点数据更新失败:", error);
+            console.error(`热点数据更新失败: ${error}:`, error);
         } finally {
             const endTime = Date.now();
             console.log(`热点数据更新耗时: ${endTime - startTime}ms`);
