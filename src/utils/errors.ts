@@ -171,7 +171,6 @@ export const broadcastErrorEvent = (socket: Socket, roomId: string, error: RoomE
  * @param req 请求对象
  * @param res 响应对象
  * @param _next 下一个中间件
- * @param next 下一个中间件
  */
 export const errorHandler = (err: unknown, req: Request, res: Response, _next: NextFunction): void => {
     console.error(`Error occurred ${req.method} ${req.url}:`, err);
